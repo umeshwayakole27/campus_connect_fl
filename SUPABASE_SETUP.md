@@ -72,6 +72,8 @@ CREATE TABLE campus_locations (
 CREATE INDEX idx_campus_locations_name ON campus_locations(name);
 ```
 
+**Note:** This is the basic table structure. When you reach Phase 3 (Campus Map), you'll add additional columns (`category`, `floor_info`, `image_url`, `updated_at`) using the SQL script in `PHASE3_SETUP.md`. The Phase 3 script is designed to safely add these columns without affecting existing data.
+
 ### 4. Create Events Table
 ```sql
 CREATE TABLE events (

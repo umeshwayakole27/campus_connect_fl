@@ -4,10 +4,10 @@
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         
-        <!-- Google Maps API Key - Add your key in .env file -->
+        <!-- Google Maps API Key -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyDummy_Key_Replace_With_Real_Key"/>
+            android:value="AIzaSyCc2AHZNmWl19wWtNqfYQRleBlbwnrpN6M"/>
         
         <activity
             android:name=".MainActivity"

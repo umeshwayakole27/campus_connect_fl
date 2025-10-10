@@ -1,36 +1,136 @@
 {
   "name": "campus_connect_fl",
   "version": "1.0.0",
-  "description": "Campus Connect Flutter Application - A Flutter project for campus connectivity",
+  "description": "Campus Connect Flutter Application - GECA Aurangabad campus navigation, event discovery, and faculty directory app",
   "framework": "flutter",
   "language": "dart",
+  "projectContext": {
+    "institution": "Government College of Engineering, Aurangabad (GECA)",
+    "location": "Chhatrapati Sambhajinagar (Aurangabad), Maharashtra",
+    "packageName": "com.campus_connect.geca",
+    "primaryPurpose": "Campus navigation, event management, and faculty information system",
+    "targetUsers": ["Students", "Faculty"],
+    "currentPhase": "Phase 4 - Event Management Module",
+    "completedPhases": ["Phase 1: Setup", "Phase 2: Authentication", "Phase 3: Campus Map"]
+  },
   "contextPaths": [
     {
-      "path": "lib",
-      "description": "Main application source code",
+      "path": "progress.md",
+      "description": "Development progress tracker - CRITICAL for resuming work and understanding project state",
+      "priority": "critical",
+      "tags": ["progress", "tracking", "documentation"]
+    },
+    {
+      "path": "lib/main.dart",
+      "description": "Application entry point with Supabase and Provider initialization",
+      "priority": "critical",
+      "tags": ["entrypoint", "initialization"]
+    },
+    {
+      "path": "lib/core",
+      "description": "Core application utilities, models, services, and widgets",
       "priority": "high",
-      "include": ["**/*.dart"]
+      "include": ["**/*.dart"],
+      "tags": ["core", "shared", "utilities"]
+    },
+    {
+      "path": "lib/features/auth",
+      "description": "Authentication and user management with role-based access (student/faculty)",
+      "priority": "high",
+      "include": ["**/*.dart"],
+      "tags": ["authentication", "authorization", "user-management"]
+    },
+    {
+      "path": "lib/features/campus_map",
+      "description": "Google Maps integration for GECA campus navigation with 14 locations",
+      "priority": "high",
+      "include": ["**/*.dart"],
+      "tags": ["maps", "navigation", "locations"]
+    },
+    {
+      "path": "lib/features/events",
+      "description": "Event management module (faculty can create, students can view)",
+      "priority": "high",
+      "include": ["**/*.dart"],
+      "tags": ["events", "management", "role-based"]
+    },
+    {
+      "path": "lib/features/faculty",
+      "description": "Faculty directory and information module",
+      "priority": "medium",
+      "include": ["**/*.dart"],
+      "tags": ["faculty", "directory"]
+    },
+    {
+      "path": "lib/features/notifications",
+      "description": "Notification system (faculty can send, students receive)",
+      "priority": "medium",
+      "include": ["**/*.dart"],
+      "tags": ["notifications", "push", "messaging"]
+    },
+    {
+      "path": "lib/features/search",
+      "description": "Global search across events, locations, and faculty",
+      "priority": "medium",
+      "include": ["**/*.dart"],
+      "tags": ["search", "query"]
     },
     {
       "path": "test",
-      "description": "Test files",
+      "description": "Test files for unit and widget testing",
       "priority": "medium",
-      "include": ["**/*.dart"]
+      "include": ["**/*.dart"],
+      "tags": ["testing", "quality-assurance"]
     },
     {
       "path": "pubspec.yaml",
       "description": "Flutter dependencies and project configuration",
-      "priority": "high"
+      "priority": "high",
+      "tags": ["config", "dependencies"]
     },
     {
-      "path": "analysis_options.yaml",
-      "description": "Dart linting and analysis configuration",
-      "priority": "medium"
+      "path": ".env",
+      "description": "Environment variables for Supabase and Google Maps API credentials",
+      "priority": "critical",
+      "tags": ["config", "secrets", "credentials"],
+      "note": "Never commit this file - contains sensitive data"
+    },
+    {
+      "path": ".env.example",
+      "description": "Template for environment variables",
+      "priority": "medium",
+      "tags": ["config", "template"]
+    },
+    {
+      "path": "SUPABASE_SETUP.md",
+      "description": "Complete Supabase database setup guide with schema and RLS policies",
+      "priority": "high",
+      "tags": ["documentation", "setup", "database"]
+    },
+    {
+      "path": "PHASE*.md",
+      "description": "Phase-specific setup and summary documentation",
+      "priority": "high",
+      "include": ["PHASE*.md"],
+      "tags": ["documentation", "phases", "guides"]
     },
     {
       "path": "README.md",
-      "description": "Project documentation",
-      "priority": "high"
+      "description": "Project overview and quick start guide",
+      "priority": "high",
+      "tags": ["documentation", "overview"]
+    },
+    {
+      "path": "android/app/src/main/AndroidManifest.xml",
+      "description": "Android configuration with Google Maps API key",
+      "priority": "medium",
+      "tags": ["android", "config"]
+    },
+    {
+      "path": "android/app/build.gradle",
+      "description": "Android build configuration with package name",
+      "priority": "medium",
+      "tags": ["android", "build"]
     }
   ],
   "excludePaths": [
@@ -44,21 +144,242 @@
     "**/.flutter-plugins-dependencies",
     "**/android/build/**",
     "**/ios/Pods/**",
-    "**/ios/build/**"
+    "**/ios/build/**",
+    "**/.gradle/**",
+    "**/flutter_*.log"
   ],
   "keyFiles": [
+    "progress.md",
     "lib/main.dart",
-    "pubspec.yaml"
+    "pubspec.yaml",
+    ".env",
+    "SUPABASE_SETUP.md"
   ],
   "buildCommands": {
     "install": "flutter pub get",
-    "build": "flutter build",
+    "build": "flutter build apk --release",
+    "buildDebug": "flutter build apk --debug",
+    "run": "flutter run",
+    "runRelease": "flutter run --release",
     "test": "flutter test",
-    "lint": "flutter analyze"
+    "lint": "flutter analyze",
+    "clean": "flutter clean",
+    "codegen": "dart run build_runner build --delete-conflicting-outputs"
+  },
+  "architecture": {
+    "pattern": "Clean Architecture with Feature-First",
+    "stateManagement": "Provider",
+    "navigation": "go_router",
+    "backend": "Supabase (PostgreSQL)",
+    "authentication": "Supabase Auth",
+    "storage": "flutter_secure_storage",
+    "layers": {
+      "data": "Repositories for data access and API calls",
+      "domain": "Business logic and entities",
+      "presentation": "UI screens, widgets, and providers"
+    }
+  },
+  "backend": {
+    "service": "Supabase",
+    "database": "PostgreSQL",
+    "authentication": "Supabase Auth (email/password)",
+    "storage": "Supabase Storage (future use)",
+    "realtime": "Supabase Realtime subscriptions",
+    "tables": [
+      "users (role-based: student/faculty)",
+      "events (faculty can manage)",
+      "faculty (directory information)",
+      "campus_locations (GECA buildings)",
+      "notifications (faculty can send)"
+    ],
+    "rls": "Row Level Security policies enforced for all tables"
+  },
+  "thirdPartyServices": {
+    "googleMaps": {
+      "sdk": "google_maps_flutter",
+      "purpose": "Campus navigation and location markers",
+      "locations": 14,
+      "campus": "GECA Aurangabad"
+    },
+    "firebaseMessaging": {
+      "sdk": "firebase_messaging",
+      "purpose": "Push notifications for events",
+      "status": "configured"
+    }
+  },
+  "features": {
+    "authentication": {
+      "status": "completed",
+      "capabilities": [
+        "Email/password signup with role selection",
+        "Login with persistent sessions",
+        "Password reset via email",
+        "Profile management",
+        "Role-based access control (student/faculty)"
+      ]
+    },
+    "campusMap": {
+      "status": "completed",
+      "capabilities": [
+        "Interactive Google Maps view",
+        "14 GECA campus location markers",
+        "Category-based filtering",
+        "Location details bottom sheet",
+        "Auto-refresh functionality",
+        "Performance optimizations"
+      ]
+    },
+    "eventManagement": {
+      "status": "in-progress",
+      "capabilities": [
+        "Faculty can create/edit/delete events",
+        "Students can view events",
+        "Link events to campus locations",
+        "Event notifications",
+        "RLS policy enforcement"
+      ]
+    },
+    "facultyDirectory": {
+      "status": "planned",
+      "capabilities": [
+        "Searchable faculty list",
+        "Faculty contact information",
+        "Office locations on map",
+        "Office hours display"
+      ]
+    },
+    "notifications": {
+      "status": "planned",
+      "capabilities": [
+        "Faculty can create notifications",
+        "Students receive push notifications",
+        "Event-based notifications",
+        "In-app notification center"
+      ]
+    },
+    "search": {
+      "status": "planned",
+      "capabilities": [
+        "Global search bar",
+        "Search events, faculty, locations",
+        "Real-time search results"
+      ]
+    }
+  },
+  "roleBasedAccess": {
+    "student": {
+      "permissions": [
+        "View all events",
+        "View faculty directory",
+        "View campus map",
+        "Receive notifications",
+        "Update own profile"
+      ],
+      "restrictions": [
+        "Cannot create/edit/delete events",
+        "Cannot send notifications",
+        "Cannot manage campus locations"
+      ]
+    },
+    "faculty": {
+      "permissions": [
+        "All student permissions",
+        "Create/edit/delete events",
+        "Send notifications to students",
+        "Manage campus locations (optional)",
+        "Update faculty-specific profile fields"
+      ]
+    }
   },
   "metadata": {
     "sdk": "^3.9.2",
     "platforms": ["android", "ios", "web", "linux", "macos", "windows"],
-    "projectType": "application"
-  }
+    "projectType": "application",
+    "dependencies": {
+      "total": 136,
+      "key": [
+        "supabase_flutter: ^2.5.6",
+        "google_maps_flutter: ^2.9.0",
+        "firebase_messaging: ^15.0.4",
+        "provider: ^6.1.2",
+        "go_router: ^14.2.7",
+        "flutter_secure_storage: ^9.2.2",
+        "flutter_dotenv: ^5.1.0",
+        "json_annotation: ^4.9.0"
+      ]
+    }
+  },
+  "developmentGuidelines": {
+    "codeStyle": "Effective Dart guidelines",
+    "testing": "Unit tests for services, widget tests for UI",
+    "documentation": "Update progress.md after every major change",
+    "security": [
+      "Never commit .env file",
+      "Use RLS policies for all database operations",
+      "Validate all user inputs",
+      "Implement role checks in both UI and backend"
+    ],
+    "performance": [
+      "Use ListView.builder for lists",
+      "Cache images with cached_network_image",
+      "Debounce search inputs",
+      "Optimize map rendering"
+    ]
+  },
+  "aiAssistanceContext": {
+    "resumeWork": "Always check progress.md first to understand current state and completed tasks",
+    "newFeatures": "Follow the phase-by-phase roadmap in README.md",
+    "bugs": "Check existing documentation files for known issues and solutions",
+    "database": "Refer to SUPABASE_SETUP.md for schema and RLS policies",
+    "testing": "Run on Android device for real testing (maps require real device)",
+    "codeGeneration": "Run 'dart run build_runner build --delete-conflicting-outputs' after model changes"
+  },
+  "commonTasks": {
+    "startDevelopment": [
+      "1. Check progress.md for current phase",
+      "2. Verify .env has all required credentials",
+      "3. Run flutter pub get",
+      "4. Run flutter run on connected device"
+    ],
+    "addNewFeature": [
+      "1. Create feature folder in lib/features/",
+      "2. Implement data/domain/presentation layers",
+      "3. Add provider for state management",
+      "4. Update navigation in main.dart",
+      "5. Test with both student and faculty roles",
+      "6. Update progress.md"
+    ],
+    "troubleshooting": [
+      "1. Check flutter doctor",
+      "2. Run flutter clean && flutter pub get",
+      "3. Verify .env credentials are correct",
+      "4. Check Supabase dashboard for RLS policies",
+      "5. Review error logs in terminal"
+    ]
+  },
+  "knownIssues": [
+    {
+      "issue": "Map loads slowly on first launch",
+      "solution": "Normal behavior - tiles are cached after first load",
+      "severity": "low"
+    },
+    {
+      "issue": "Email confirmation redirects to localhost",
+      "solution": "Configure redirect URLs in Supabase dashboard or disable email confirmation",
+      "severity": "medium",
+      "documentation": "SUPABASE_EMAIL_FIX.md"
+    },
+    {
+      "issue": "RadioListTile deprecation warnings",
+      "solution": "Cosmetic only - will be updated in future Flutter version",
+      "severity": "low"
+    }
+  ],
+  "nextSteps": [
+    "Phase 4: Implement Event Management Module",
+    "Phase 5: Build Faculty Directory",
+    "Phase 6: Add Search and Notifications",
+    "Phase 7: Polish UI/UX",
+    "Phase 8: Testing and Deployment"
+  ]
 }

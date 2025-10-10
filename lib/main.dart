@@ -7,6 +7,7 @@ import 'core/utils.dart';
 import 'core/providers/auth_provider.dart';
 import 'features/auth/presentation/login_screen.dart';
 import 'features/auth/presentation/profile_screen.dart';
+import 'features/campus_map/presentation/campus_map_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -221,7 +222,7 @@ class _HomePageState extends State<HomePage> {
       case 0:
         return _buildHomePage();
       case 1:
-        return _buildComingSoonPage('Map', 'Phase 3');
+        return const CampusMapScreen();
       case 2:
         return _buildComingSoonPage('Events', 'Phase 4');
       case 3:
@@ -283,7 +284,7 @@ class _HomePageState extends State<HomePage> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
               child: Text(
-                'Authentication system is now working!\n\nYou can:\n• Login & Register\n• Manage your profile\n• Role-based access (${user?.role})',
+                'App Features:\n\n• 🔐 Authentication (Login/Register)\n• 👤 Profile Management\n• 🗺️ Campus Map Navigation\n• 📍 Location Discovery',
                 style: AppTextStyles.bodyLarge,
                 textAlign: TextAlign.center,
               ),
