@@ -1,0 +1,64 @@
+{
+  "name": "campus_connect_fl",
+  "version": "1.0.0",
+  "description": "Campus Connect Flutter Application - A Flutter project for campus connectivity",
+  "framework": "flutter",
+  "language": "dart",
+  "contextPaths": [
+    {
+      "path": "lib",
+      "description": "Main application source code",
+      "priority": "high",
+      "include": ["**/*.dart"]
+    },
+    {
+      "path": "test",
+      "description": "Test files",
+      "priority": "medium",
+      "include": ["**/*.dart"]
+    },
+    {
+      "path": "pubspec.yaml",
+      "description": "Flutter dependencies and project configuration",
+      "priority": "high"
+    },
+    {
+      "path": "analysis_options.yaml",
+      "description": "Dart linting and analysis configuration",
+      "priority": "medium"
+    },
+    {
+      "path": "README.md",
+      "description": "Project documentation",
+      "priority": "high"
+    }
+  ],
+  "excludePaths": [
+    "**/.dart_tool/**",
+    "**/build/**",
+    "**/.git/**",
+    "**/.idea/**",
+    "**/node_modules/**",
+    "**/*.lock",
+    "**/.flutter-plugins",
+    "**/.flutter-plugins-dependencies",
+    "**/android/build/**",
+    "**/ios/Pods/**",
+    "**/ios/build/**"
+  ],
+  "keyFiles": [
+    "lib/main.dart",
+    "pubspec.yaml"
+  ],
+  "buildCommands": {
+    "install": "flutter pub get",
+    "build": "flutter build",
+    "test": "flutter test",
+    "lint": "flutter analyze"
+  },
+  "metadata": {
+    "sdk": "^3.9.2",
+    "platforms": ["android", "ios", "web", "linux", "macos", "windows"],
+    "projectType": "application"
+  }
+}
