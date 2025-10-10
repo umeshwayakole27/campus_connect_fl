@@ -1,4 +1,4 @@
-package com.example.campus_connect_fl
+package com.campus_connect.geca
 
 import io.flutter.embedding.android.FlutterActivity
 
