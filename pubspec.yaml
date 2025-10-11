@@ -90,6 +90,9 @@ dev_dependencies:
   build_runner: ^2.4.12
   json_serializable: ^6.8.0
   
+  # App Icon Generator
+  flutter_launcher_icons: ^0.13.1
+  
   # Testing
   mockito: ^5.4.4
 
@@ -134,3 +137,14 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+# App Icon Configuration
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/icon/app_icon.png"
+  # Adaptive icon for Android 8.0+
+  adaptive_icon_background: "#1976D2"
+  adaptive_icon_foreground: "assets/icon/app_icon.png"
+  # Notification icon (optional)
+  # android_notification_icon: "assets/icon/notification_icon.png"

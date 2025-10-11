@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <!-- Campus Building Icon with 3D Effect -->
+    <group
+        android:translateX="54"
+        android:translateY="54">
+        
+        <!-- Shadow layer for 3D effect -->
+        <path
+            android:fillColor="#40000000"
+            android:pathData="M-18,22 L-18,28 L18,28 L18,22 L12,22 L12,-20 L6,-20 L6,-26 L-6,-26 L-6,-20 L-12,-20 L-12,22 Z"/>
+        
+        <!-- Main building body -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M-18,20 L-18,26 L18,26 L18,20 L12,20 L12,-22 L6,-22 L6,-28 L-6,-28 L-6,-22 L-12,-22 L-12,20 Z"/>
+        
+        <!-- Building top (roof) - darker shade -->
+        <path
+            android:fillColor="#E3F2FD"
+            android:pathData="M-20,-28 L0,-34 L20,-28 L18,-26 L0,-32 L-18,-26 Z"/>
+        
+        <!-- Windows - left column -->
+        <path
+            android:fillColor="#1976D2"
+            android:pathData="M-14,-18 L-10,-18 L-10,-14 L-14,-14 Z"/>
+        <path
+            android:fillColor="#1976D2"
+            android:pathData="M-14,-10 L-10,-10 L-10,-6 L-14,-6 Z"/>
+        <path
+            android:fillColor="#1976D2"
+            android:pathData="M-14,-2 L-10,-2 L-10,2 L-14,2 Z"/>
+        <path
+            android:fillColor="#1976D2"
+            android:pathData="M-14,6 L-10,6 L-10,10 L-14,10 Z"/>
+        <path
+            android:fillColor="#1976D2"
+            android:pathData="M-14,14 L-10,14 L-10,18 L-14,18 Z"/>
+        
+        <!-- Windows - center left -->
+        <path
+            android:fillColor="#1976D2"
+            android:pathData="M-8,-18 L-4,-18 L-4,-14 L-8,-14 Z"/>
+        <path
+            android:fillColor="#1976D2"
+            android:pathData="M-8,-10 L-4,-10 L-4,-6 L-8,-6 Z"/>
+        <path
+            android:fillColor="#1976D2"
+            android:pathData="M-8,-2 L-4,-2 L-4,2 L-8,2 Z"/>
+        <path
+            android:fillColor="#1976D2"
+            android:pathData="M-8,6 L-4,6 L-4,10 L-8,10 Z"/>
+        <path
+            android:fillColor="#1976D2"
+            android:pathData="M-8,14 L-4,14 L-4,18 L-8,18 Z"/>
+        
+        <!-- Windows - center right -->
+        <path
+            android:fillColor="#1976D2"
+            android:pathData="M4,-18 L8,-18 L8,-14 L4,-14 Z"/>
+        <path
+            android:fillColor="#1976D2"
+            android:pathData="M4,-10 L8,-10 L8,-6 L4,-6 Z"/>
+        <path
+            android:fillColor="#1976D2"
+            android:pathData="M4,-2 L8,-2 L8,2 L4,2 Z"/>
+        <path
+            android:fillColor="#1976D2"
+            android:pathData="M4,6 L8,6 L8,10 L4,10 Z"/>
+        <path
+            android:fillColor="#1976D2"
+            android:pathData="M4,14 L8,14 L8,18 L4,18 Z"/>
+        
+        <!-- Windows - right column -->
+        <path
+            android:fillColor="#1976D2"
+            android:pathData="M10,-18 L14,-18 L14,-14 L10,-14 Z"/>
+        <path
+            android:fillColor="#1976D2"
+            android:pathData="M10,-10 L14,-10 L14,-6 L10,-6 Z"/>
+        <path
+            android:fillColor="#1976D2"
+            android:pathData="M10,-2 L14,-2 L14,2 L10,2 Z"/>
+        <path
+            android:fillColor="#1976D2"
+            android:pathData="M10,6 L14,6 L14,10 L10,10 Z"/>
+        <path
+            android:fillColor="#1976D2"
+            android:pathData="M10,14 L14,14 L14,18 L10,18 Z"/>
+        
+        <!-- Door -->
+        <path
+            android:fillColor="#0D47A1"
+            android:pathData="M-2,12 L-2,24 L2,24 L2,12 Z"/>
+        
+        <!-- Door handle (using path instead of circle) -->
+        <path
+            android:fillColor="#FFD54F"
+            android:pathData="M0.5,17.5 a0.5,0.5 0,1,1 1,0 a0.5,0.5 0,1,1 -1,0"/>
+        
+        <!-- Central tower/spire -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M-4,-24 L-4,-18 L4,-18 L4,-24 Z"/>
+        
+        <!-- Tower window -->
+        <path
+            android:fillColor="#1976D2"
+            android:pathData="M-2,-22 L2,-22 L2,-20 L-2,-20 Z"/>
+        
+        <!-- Flag pole -->
+        <path
+            android:fillColor="#757575"
+            android:pathData="M-0.5,-28 L-0.5,-34 L0.5,-34 L0.5,-28 Z"/>
+        
+        <!-- Flag -->
+        <path
+            android:fillColor="#FF5722"
+            android:pathData="M0.5,-32 L0.5,-30 L4,-31 Z"/>
+    </group>
+</vector>
