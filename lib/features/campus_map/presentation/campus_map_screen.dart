@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:async';
+import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../../core/models/location_model.dart';
 import '../../../core/theme.dart';
 import '../../../core/utils.dart';
+import '../../../core/services/directions_service.dart';
 import '../data/location_repository.dart';
 
 class CampusMapScreen extends StatefulWidget {
@@ -15,16 +18,20 @@ class CampusMapScreen extends StatefulWidget {
 
 class _CampusMapScreenState extends State<CampusMapScreen> with AutomaticKeepAliveClientMixin {
   final LocationRepository _locationRepository = LocationRepository();
+  final DirectionsService _directionsService = DirectionsService();
   final Completer<GoogleMapController> _controllerCompleter = Completer();
   GoogleMapController? _mapController;
   
   List<CampusLocation> _locations = [];
   Set<Marker> _markers = {};
-  CampusLocation? _selectedLocation;
+  Set<Polyline> _polylines = {};
   bool _isLoading = false;
   bool _isInitialized = false;
   String? _errorMessage;
   String _selectedCategory = 'all';
+  LatLng? _currentUserLocation;
+  bool _isNavigating = false;
+  bool _isFetchingRoute = false;
 
   // Default campus center (GECA Chhatrapati Sambhajinagar campus)
   static const LatLng _campusCenter = LatLng(19.8680502, 75.3241057);
@@ -49,8 +56,127 @@ class _CampusMapScreenState extends State<CampusMapScreen> with AutomaticKeepAli
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_isInitialized) {
         _loadLocations();
+        _getCurrentLocation();
       }
     });
+  }
+
+  Future<void> _getCurrentLocation() async {
+    try {
+      // Check if location service is enabled
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        if (mounted) {
+          final shouldOpen = await _showLocationServiceDialog();
+          if (shouldOpen) {
+            await Geolocator.openLocationSettings();
+          }
+        }
+        return;
+      }
+
+      // Check and request permission
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          if (mounted) {
+            AppUtils.showSnackBar(
+              context,
+              'Location permission is required to show your position',
+              isError: true,
+            );
+          }
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        if (mounted) {
+          final shouldOpen = await _showPermissionDeniedDialog();
+          if (shouldOpen) {
+            await openAppSettings();
+          }
+        }
+        return;
+      }
+
+      // Get current position
+      Position position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          distanceFilter: 10,
+        ),
+      );
+
+      if (mounted) {
+        setState(() {
+          _currentUserLocation = LatLng(position.latitude, position.longitude);
+        });
+        _updateMarkers();
+        
+        // Animate to user location
+        _mapController?.animateCamera(
+          CameraUpdate.newLatLngZoom(
+            LatLng(position.latitude, position.longitude),
+            17,
+          ),
+        );
+      }
+    } catch (e) {
+      AppLogger.logError('Failed to get current location', error: e);
+      if (mounted) {
+        AppUtils.showSnackBar(
+          context,
+          'Failed to get your location: ${e.toString()}',
+          isError: true,
+        );
+      }
+    }
+  }
+
+  Future<bool> _showLocationServiceDialog() async {
+    return await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Location Services Disabled'),
+        content: const Text(
+          'Location services are turned off. Please enable them to use navigation features.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Open Settings'),
+          ),
+        ],
+      ),
+    ) ?? false;
+  }
+
+  Future<bool> _showPermissionDeniedDialog() async {
+    return await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Location Permission Required'),
+        content: const Text(
+          'Location permission is permanently denied. Please enable it from app settings to use navigation features.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Open Settings'),
+          ),
+        ],
+      ),
+    ) ?? false;
   }
 
   Future<void> _loadLocations({bool forceRefresh = false}) async {
@@ -90,6 +216,21 @@ class _CampusMapScreenState extends State<CampusMapScreen> with AutomaticKeepAli
         : _locations.where((loc) => loc.category == _selectedCategory).toList();
 
     final newMarkers = <Marker>{};
+    
+    // Add user's current location marker if available
+    if (_currentUserLocation != null) {
+      newMarkers.add(
+        Marker(
+          markerId: const MarkerId('current_location'),
+          position: _currentUserLocation!,
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+          infoWindow: const InfoWindow(
+            title: 'Your Location',
+            snippet: 'You are here',
+          ),
+        ),
+      );
+    }
     
     for (final location in filteredLocations) {
       newMarkers.add(
@@ -137,10 +278,6 @@ class _CampusMapScreenState extends State<CampusMapScreen> with AutomaticKeepAli
   }
 
   void _showLocationDetails(CampusLocation location) {
-    setState(() {
-      _selectedLocation = location;
-    });
-
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -288,23 +425,167 @@ class _CampusMapScreenState extends State<CampusMapScreen> with AutomaticKeepAli
     );
   }
 
-  void _navigateToLocation(CampusLocation location) {
-    // For now, just animate to the location
-    // In a production app, you'd integrate with actual navigation
+  void _navigateToLocation(CampusLocation location) async {
+    if (_currentUserLocation == null) {
+      AppUtils.showSnackBar(
+        context,
+        'Getting your location...',
+      );
+      await _getCurrentLocation();
+      if (_currentUserLocation == null) {
+        if (mounted) {
+          AppUtils.showSnackBar(
+            context,
+            'Unable to get your location. Please enable location services.',
+            isError: true,
+          );
+        }
+        return;
+      }
+    }
+
+    setState(() {
+      _isFetchingRoute = true;
+    });
+
+    Navigator.pop(context); // Close the bottom sheet
+
+    try {
+      // Fetch route from Google Directions API
+      final routeCoordinates = await _directionsService.getDirections(
+        origin: _currentUserLocation!,
+        destination: LatLng(location.lat, location.lng),
+      );
+
+      if (routeCoordinates != null && routeCoordinates.isNotEmpty) {
+        final polyline = Polyline(
+          polylineId: const PolylineId('navigation_route'),
+          color: AppTheme.primaryColor,
+          width: 5,
+          points: routeCoordinates,
+          geodesic: true,
+        );
+
+        setState(() {
+          _polylines = {polyline};
+          _isNavigating = true;
+          _isFetchingRoute = false;
+        });
+
+        // Calculate bounds to show the entire route
+        final bounds = _calculateBounds(routeCoordinates);
+
+        // Animate camera to show the route
+        _mapController?.animateCamera(
+          CameraUpdate.newLatLngBounds(bounds, 100),
+        );
+
+        // Calculate distance
+        final distanceInMeters = Geolocator.distanceBetween(
+          _currentUserLocation!.latitude,
+          _currentUserLocation!.longitude,
+          location.lat,
+          location.lng,
+        );
+
+        if (mounted) {
+          final distance = distanceInMeters < 1000
+              ? '${distanceInMeters.toStringAsFixed(0)} meters'
+              : '${(distanceInMeters / 1000).toStringAsFixed(2)} km';
+          
+          AppUtils.showSnackBar(
+            context,
+            'Route to ${location.name} (Distance: $distance)',
+          );
+        }
+      } else {
+        // Fallback to straight line if API fails
+        _drawStraightLine(location);
+      }
+    } catch (e) {
+      AppLogger.logError('Error fetching route', error: e);
+      // Fallback to straight line
+      _drawStraightLine(location);
+    }
+  }
+
+  void _drawStraightLine(CampusLocation location) {
+    if (_currentUserLocation == null) return;
+
+    final polylineCoordinates = <LatLng>[
+      _currentUserLocation!,
+      LatLng(location.lat, location.lng),
+    ];
+
+    final polyline = Polyline(
+      polylineId: const PolylineId('navigation_route'),
+      color: AppTheme.primaryColor,
+      width: 5,
+      points: polylineCoordinates,
+      patterns: [
+        PatternItem.dash(30),
+        PatternItem.gap(20),
+      ],
+    );
+
+    setState(() {
+      _polylines = {polyline};
+      _isNavigating = true;
+      _isFetchingRoute = false;
+    });
+
+    // Calculate bounds
+    final bounds = _calculateBounds(polylineCoordinates);
+
+    // Animate camera to show the route
     _mapController?.animateCamera(
-      CameraUpdate.newCameraPosition(
-        CameraPosition(
-          target: LatLng(location.lat, location.lng),
-          zoom: 18,
-          tilt: 45,
-        ),
-      ),
+      CameraUpdate.newLatLngBounds(bounds, 100),
     );
-    Navigator.pop(context);
-    AppUtils.showSnackBar(
-      context,
-      'Navigation to ${location.name}',
+
+    // Calculate distance
+    final distanceInMeters = Geolocator.distanceBetween(
+      _currentUserLocation!.latitude,
+      _currentUserLocation!.longitude,
+      location.lat,
+      location.lng,
     );
+
+    if (mounted) {
+      final distance = distanceInMeters < 1000
+          ? '${distanceInMeters.toStringAsFixed(0)} meters'
+          : '${(distanceInMeters / 1000).toStringAsFixed(2)} km';
+      
+      AppUtils.showSnackBar(
+        context,
+        'Showing straight line to ${location.name} (Distance: $distance)',
+      );
+    }
+  }
+
+  LatLngBounds _calculateBounds(List<LatLng> coordinates) {
+    double minLat = coordinates.first.latitude;
+    double maxLat = coordinates.first.latitude;
+    double minLng = coordinates.first.longitude;
+    double maxLng = coordinates.first.longitude;
+
+    for (var coord in coordinates) {
+      if (coord.latitude < minLat) minLat = coord.latitude;
+      if (coord.latitude > maxLat) maxLat = coord.latitude;
+      if (coord.longitude < minLng) minLng = coord.longitude;
+      if (coord.longitude > maxLng) maxLng = coord.longitude;
+    }
+
+    return LatLngBounds(
+      southwest: LatLng(minLat, minLng),
+      northeast: LatLng(maxLat, maxLng),
+    );
+  }
+
+  void _clearNavigation() {
+    setState(() {
+      _polylines.clear();
+      _isNavigating = false;
+    });
   }
 
   void _centerMapOnLocation(CampusLocation location) {
@@ -416,6 +697,7 @@ class _CampusMapScreenState extends State<CampusMapScreen> with AutomaticKeepAli
                           zoom: 15,
                         ),
                         markers: _markers,
+                        polylines: _polylines,
                         onMapCreated: (controller) {
                           if (!_controllerCompleter.isCompleted) {
                             _controllerCompleter.complete(controller);
@@ -443,6 +725,55 @@ class _CampusMapScreenState extends State<CampusMapScreen> with AutomaticKeepAli
                                 Text('Loading campus locations...'),
                               ],
                             ),
+                          ),
+                        ),
+                      if (_isFetchingRoute)
+                        Positioned(
+                          top: 16,
+                          left: 0,
+                          right: 0,
+                          child: Center(
+                            child: Card(
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: const [
+                                    SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(strokeWidth: 2),
+                                    ),
+                                    SizedBox(width: 12),
+                                    Text('Calculating route...'),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      // MyLocation Button
+                      Positioned(
+                        bottom: _isNavigating ? 80 : 16,
+                        right: 16,
+                        child: FloatingActionButton(
+                          heroTag: 'myLocation',
+                          onPressed: _getCurrentLocation,
+                          backgroundColor: Colors.white,
+                          foregroundColor: AppTheme.primaryColor,
+                          child: const Icon(Icons.my_location),
+                        ),
+                      ),
+                      if (_isNavigating)
+                        Positioned(
+                          bottom: 16,
+                          right: 16,
+                          child: FloatingActionButton.extended(
+                            heroTag: 'clearRoute',
+                            onPressed: _clearNavigation,
+                            icon: const Icon(Icons.close),
+                            label: const Text('Clear Route'),
+                            backgroundColor: Colors.red,
                           ),
                         ),
                     ],

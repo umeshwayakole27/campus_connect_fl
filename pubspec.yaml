@@ -68,6 +68,10 @@ dependencies:
   
   # JSON Serialization
   json_annotation: ^4.9.0
+  geolocator: ^14.0.2
+  location: ^8.0.1
+  permission_handler: ^11.3.1
+  flutter_polyline_points: ^2.1.0
 
 dev_dependencies:
   flutter_test:
