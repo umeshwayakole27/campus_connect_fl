@@ -73,6 +73,12 @@ dependencies:
   permission_handler: ^11.3.1
   flutter_polyline_points: ^2.1.0
   url_launcher: ^6.3.2
+  
+  # UI Enhancements (Phase 7)
+  shimmer: ^3.0.0
+  pull_to_refresh: ^2.0.0
+  flutter_staggered_animations: ^1.1.1
+  lottie: ^3.1.2
 
 dev_dependencies:
   flutter_test:
