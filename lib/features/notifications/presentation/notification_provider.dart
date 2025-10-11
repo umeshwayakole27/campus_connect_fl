@@ -1,0 +1,190 @@
+import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../data/notification_repository.dart';
+import '../services/fcm_service.dart';
+import '../../../core/models/notification_model.dart';
+
+class NotificationProvider extends ChangeNotifier {
+  final NotificationRepository _repository = NotificationRepository();
+  final FCMService _fcmService = FCMService();
+
+  // State
+  List<AppNotification> _notifications = [];
+  bool _isLoading = false;
+  String? _error;
+  int _unreadCount = 0;
+  
+  RealtimeChannel? _realtimeSubscription;
+
+  // Getters
+  List<AppNotification> get notifications => _notifications;
+  bool get isLoading => _isLoading;
+  String? get error => _error;
+  int get unreadCount => _unreadCount;
+
+  List<AppNotification> get unreadNotifications =>
+      _notifications.where((n) => !n.read).toList();
+
+  List<AppNotification> get readNotifications =>
+      _notifications.where((n) => n.read).toList();
+
+  // Initialize FCM
+  Future<void> initializeFCM() async {
+    try {
+      await _fcmService.initialize();
+      
+      // Subscribe to general topics
+      await _fcmService.subscribeToTopic('all_users');
+      
+      print('FCM initialized and subscribed to topics');
+    } catch (e) {
+      print('Error initializing FCM: $e');
+    }
+  }
+
+  // Load notifications
+  Future<void> loadNotifications(String userId) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      _notifications = await _repository.getNotifications(userId);
+      _unreadCount = await _repository.getUnreadCount(userId);
+      _error = null;
+
+      // Subscribe to real-time updates
+      _subscribeToRealtime(userId);
+    } catch (e) {
+      _error = 'Failed to load notifications: ${e.toString()}';
+      _notifications = [];
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Subscribe to real-time notifications
+  void _subscribeToRealtime(String userId) {
+    // Unsubscribe from previous subscription
+    if (_realtimeSubscription != null) {
+      _repository.unsubscribeFromNotifications(_realtimeSubscription!);
+    }
+
+    // Subscribe to new notifications
+    _realtimeSubscription = _repository.subscribeToNotifications(
+      userId,
+      (notification) {
+        // Add new notification to the list
+        _notifications.insert(0, notification);
+        _unreadCount++;
+        notifyListeners();
+
+        // Show a snackbar or local notification
+        print('New notification received: ${notification.title}');
+      },
+    );
+  }
+
+  // Mark notification as read
+  Future<void> markAsRead(String notificationId) async {
+    try {
+      await _repository.markAsRead(notificationId);
+
+      // Update local state
+      final index = _notifications.indexWhere((n) => n.id == notificationId);
+      if (index != -1 && !_notifications[index].read) {
+        _notifications[index] = _notifications[index].copyWith(read: true);
+        _unreadCount = (_unreadCount - 1).clamp(0, double.infinity).toInt();
+        notifyListeners();
+      }
+    } catch (e) {
+      print('Error marking as read: $e');
+    }
+  }
+
+  // Mark all as read
+  Future<void> markAllAsRead(String userId) async {
+    try {
+      await _repository.markAllAsRead(userId);
+
+      // Update local state
+      _notifications = _notifications.map((n) => n.copyWith(read: true)).toList();
+      _unreadCount = 0;
+      notifyListeners();
+    } catch (e) {
+      print('Error marking all as read: $e');
+    }
+  }
+
+  // Delete notification
+  Future<void> deleteNotification(String notificationId) async {
+    try {
+      await _repository.deleteNotification(notificationId);
+
+      // Update local state
+      final index = _notifications.indexWhere((n) => n.id == notificationId);
+      if (index != -1) {
+        if (!_notifications[index].read) {
+          _unreadCount = (_unreadCount - 1).clamp(0, double.infinity).toInt();
+        }
+        _notifications.removeAt(index);
+        notifyListeners();
+      }
+    } catch (e) {
+      print('Error deleting notification: $e');
+      throw Exception('Failed to delete notification');
+    }
+  }
+
+  // Create notification (for faculty)
+  Future<void> createNotification({
+    required String userId,
+    String? eventId,
+    required String type,
+    required String title,
+    required String message,
+  }) async {
+    try {
+      await _repository.createNotification(
+        userId: userId,
+        eventId: eventId,
+        type: type,
+        title: title,
+        message: message,
+      );
+    } catch (e) {
+      print('Error creating notification: $e');
+      throw Exception('Failed to create notification');
+    }
+  }
+
+  // Broadcast notification (for faculty)
+  Future<void> broadcastNotification({
+    required String type,
+    required String title,
+    required String message,
+    String? eventId,
+  }) async {
+    try {
+      await _repository.broadcastNotification(
+        type: type,
+        title: title,
+        message: message,
+        eventId: eventId,
+      );
+    } catch (e) {
+      print('Error broadcasting notification: $e');
+      throw Exception('Failed to broadcast notification');
+    }
+  }
+
+  // Dispose
+  @override
+  void dispose() {
+    if (_realtimeSubscription != null) {
+      _repository.unsubscribeFromNotifications(_realtimeSubscription!);
+    }
+    super.dispose();
+  }
+}

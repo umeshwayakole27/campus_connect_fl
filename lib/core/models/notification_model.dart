@@ -9,6 +9,7 @@ class AppNotification extends Equatable {
   final String? userId;
   final String? eventId;
   final String type;
+  final String? title;
   final String message;
   final DateTime sentAt;
   final bool read;
@@ -18,6 +19,7 @@ class AppNotification extends Equatable {
     this.userId,
     this.eventId,
     required this.type,
+    this.title,
     required this.message,
     required this.sentAt,
     this.read = false,
@@ -32,6 +34,7 @@ class AppNotification extends Equatable {
     String? userId,
     String? eventId,
     String? type,
+    String? title,
     String? message,
     DateTime? sentAt,
     bool? read,
@@ -41,6 +44,7 @@ class AppNotification extends Equatable {
       userId: userId ?? this.userId,
       eventId: eventId ?? this.eventId,
       type: type ?? this.type,
+      title: title ?? this.title,
       message: message ?? this.message,
       sentAt: sentAt ?? this.sentAt,
       read: read ?? this.read,
@@ -53,6 +57,7 @@ class AppNotification extends Equatable {
     userId,
     eventId,
     type,
+    title,
     message,
     sentAt,
     read,

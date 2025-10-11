@@ -1,22 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'core/constants.dart';
 import 'core/theme.dart';
 import 'core/services/supabase_service.dart';
 import 'core/utils.dart';
 import 'core/providers/auth_provider.dart';
 import 'features/auth/presentation/login_screen.dart';
-import 'features/auth/presentation/profile_screen.dart';
 import 'features/campus_map/presentation/campus_map_screen.dart';
 import 'features/events/presentation/event_provider.dart';
 import 'features/events/presentation/events_screen.dart';
 import 'features/faculty/presentation/faculty_provider.dart';
 import 'features/faculty/presentation/faculty_list_screen.dart';
+import 'features/search/presentation/search_provider.dart';
+import 'features/search/presentation/search_screen.dart';
+import 'features/notifications/presentation/notification_provider.dart';
+import 'features/notifications/presentation/notifications_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   try {
+    // Initialize Firebase
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    AppLogger.logInfo('Firebase initialized successfully');
+    
     // Initialize Supabase
     await SupabaseService.instance.initialize();
     AppLogger.logInfo('${AppConstants.appName} initialized successfully');
@@ -87,6 +98,8 @@ class CampusConnectApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => EventProvider()),
         ChangeNotifierProvider(create: (_) => FacultyProvider()),
+        ChangeNotifierProvider(create: (_) => SearchProvider()),
+        ChangeNotifierProvider(create: (_) => NotificationProvider()),
       ],
       child: MaterialApp(
         title: AppConstants.appName,
@@ -170,15 +183,63 @@ class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
   @override
+  void initState() {
+    super.initState();
+    // Initialize FCM when home page loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<NotificationProvider>().initializeFCM();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text(AppConstants.appName),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {
-              AppUtils.showSnackBar(context, 'Notifications coming in Phase 6!');
+          // Notifications badge
+          Consumer<NotificationProvider>(
+            builder: (context, provider, child) {
+              return Stack(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.notifications_outlined),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const NotificationsScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  if (provider.unreadCount > 0)
+                    Positioned(
+                      right: 8,
+                      top: 8,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 16,
+                          minHeight: 16,
+                        ),
+                        child: Text(
+                          provider.unreadCount > 9 ? '9+' : '${provider.unreadCount}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
+              );
             },
           ),
         ],
@@ -214,9 +275,9 @@ class _HomePageState extends State<HomePage> {
             label: 'Faculty',
           ),
           const BottomNavigationBarItem(
-            icon: Icon(Icons.person_outlined),
-            activeIcon: Icon(Icons.person),
-            label: 'Profile',
+            icon: Icon(Icons.search_outlined),
+            activeIcon: Icon(Icons.search),
+            label: 'Search',
           ),
         ],
       ),
@@ -234,7 +295,7 @@ class _HomePageState extends State<HomePage> {
       case 3:
         return const FacultyListScreen();
       case 4:
-        return const ProfileScreen();
+        return const SearchScreen();
       default:
         return _buildHomePage();
     }
@@ -282,7 +343,7 @@ class _HomePageState extends State<HomePage> {
             ),
             const SizedBox(height: 32),
             Text(
-              '🎉 Phase 4 Complete! 🎉',
+              '🎉 Phase 6 Complete! 🎉',
               style: AppTextStyles.heading3,
               textAlign: TextAlign.center,
             ),
@@ -290,7 +351,7 @@ class _HomePageState extends State<HomePage> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
               child: Text(
-                'App Features:\n\n• 🔐 Authentication (Login/Register)\n• 👤 Profile Management\n• 🗺️ Campus Map Navigation\n• 📍 Location Discovery\n• 📅 Event Management',
+                'App Features:\n\n• 🔐 Authentication (Login/Register)\n• 👤 Profile Management\n• 🗺️ Campus Map Navigation\n• 📍 Location Discovery\n• 📅 Event Management\n• 👨‍🏫 Faculty Directory\n• 🔍 Global Search\n• 🔔 Push Notifications',
                 style: AppTextStyles.bodyLarge,
                 textAlign: TextAlign.center,
               ),
@@ -317,7 +378,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                       const SizedBox(height: 8),
                       const Text(
-                        'As a faculty member, you will be able to:\n• Create and manage events\n• Send notifications\n• Manage campus locations',
+                        'As a faculty member, you can:\n• Create and manage events\n• Send announcements to all users\n• Update faculty profile\n• View event analytics',
                         textAlign: TextAlign.center,
                       ),
                     ],
