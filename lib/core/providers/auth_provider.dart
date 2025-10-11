@@ -20,6 +20,7 @@ class AuthProvider extends ChangeNotifier {
   bool get isFaculty => _currentUser?.isFaculty ?? false;
 
   AuthProvider() {
+    _isLoading = true; // Set loading state immediately
     // Delay initialization to ensure Supabase is ready
     Future.delayed(Duration.zero, () {
       _initialize();
@@ -33,9 +34,12 @@ class AuthProvider extends ChangeNotifier {
         final userId = _authRepository.getCurrentUserId();
         if (userId != null) {
           _currentUser = await _authRepository.getUserProfile(userId);
-          notifyListeners();
         }
       }
+      
+      // Done loading
+      _isLoading = false;
+      notifyListeners();
 
       // Listen to auth state changes
       _authRepository.authStateChanges().listen((authState) {
@@ -47,6 +51,8 @@ class AuthProvider extends ChangeNotifier {
     } catch (e) {
       // Handle initialization errors gracefully
       AppLogger.logError('Auth provider initialization error', error: e);
+      _isLoading = false;
+      notifyListeners();
     }
   }
 

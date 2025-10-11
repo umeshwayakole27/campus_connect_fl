@@ -121,8 +121,8 @@ class AuthWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
-        // Show splash screen while checking auth state
-        if (authProvider.isLoading && authProvider.currentUser == null) {
+        // Show splash screen while checking auth state on app start
+        if (authProvider.isLoading) {
           return const SplashScreen();
         }
         
