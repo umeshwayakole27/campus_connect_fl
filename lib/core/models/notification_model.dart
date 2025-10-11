@@ -6,11 +6,14 @@ part 'notification_model.g.dart';
 @JsonSerializable()
 class AppNotification extends Equatable {
   final String id;
+  @JsonKey(name: 'user_id')
   final String? userId;
+  @JsonKey(name: 'event_id')
   final String? eventId;
   final String type;
   final String? title;
   final String message;
+  @JsonKey(name: 'sent_at')
   final DateTime sentAt;
   final bool read;
 

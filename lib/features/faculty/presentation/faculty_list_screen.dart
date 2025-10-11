@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import '../../../core/models/faculty_model.dart';
+import '../../../core/widgets/enhanced_cards.dart';
+import '../../../core/widgets/custom_widgets.dart';
+import '../../../core/widgets/shimmer_loading.dart';
+import '../../../core/widgets/empty_state_widget.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_decorations.dart';
 import 'faculty_provider.dart';
 import 'faculty_detail_screen.dart';
 
@@ -13,6 +20,7 @@ class FacultyListScreen extends StatefulWidget {
 
 class _FacultyListScreenState extends State<FacultyListScreen> {
   final TextEditingController _searchController = TextEditingController();
+  bool _isGridView = false;
 
   @override
   void initState() {
@@ -37,6 +45,15 @@ class _FacultyListScreenState extends State<FacultyListScreen> {
         title: const Text('Faculty Directory'),
         actions: [
           IconButton(
+            icon: Icon(_isGridView ? Icons.view_list : Icons.grid_view),
+            onPressed: () {
+              setState(() {
+                _isGridView = !_isGridView;
+              });
+            },
+            tooltip: _isGridView ? 'List View' : 'Grid View',
+          ),
+          IconButton(
             icon: const Icon(Icons.filter_list),
             onPressed: _showFilterDialog,
           ),
@@ -46,27 +63,15 @@ class _FacultyListScreenState extends State<FacultyListScreen> {
         children: [
           // Search Bar
           Padding(
-            padding: const EdgeInsets.all(16),
-            child: TextField(
+            padding: EdgeInsets.all(AppDecorations.spaceMD),
+            child: AnimatedSearchBar(
               controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search faculty by name, department...',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          context.read<FacultyProvider>().setSearchQuery('');
-                        },
-                      )
-                    : null,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
+              hintText: 'Search faculty by name, department...',
               onChanged: (value) {
                 context.read<FacultyProvider>().setSearchQuery(value);
+              },
+              onClear: () {
+                context.read<FacultyProvider>().setSearchQuery('');
               },
             ),
           ),
@@ -76,13 +81,13 @@ class _FacultyListScreenState extends State<FacultyListScreen> {
             builder: (context, provider, _) {
               if (provider.selectedDepartment != null) {
                 return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: EdgeInsets.symmetric(horizontal: AppDecorations.spaceMD),
                   child: Row(
                     children: [
-                      Chip(
-                        label: Text(provider.selectedDepartment!),
-                        deleteIcon: const Icon(Icons.close, size: 18),
-                        onDeleted: () {
+                      AnimatedFilterChip(
+                        label: provider.selectedDepartment!,
+                        selected: true,
+                        onTap: () {
                           provider.setDepartmentFilter(null);
                         },
                       ),
@@ -104,37 +109,18 @@ class _FacultyListScreenState extends State<FacultyListScreen> {
             child: Consumer<FacultyProvider>(
               builder: (context, provider, _) {
                 if (provider.isLoading && provider.facultyList.isEmpty) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const SkeletonPage(itemCount: 8, hasAppBar: false);
                 }
 
                 if (provider.error != null) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.error_outline,
-                          size: 64,
-                          color: theme.colorScheme.error,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Error loading faculty',
-                          style: theme.textTheme.titleLarge,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          provider.error!,
-                          style: theme.textTheme.bodyMedium,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton.icon(
-                          onPressed: () => provider.loadFaculty(),
-                          icon: const Icon(Icons.refresh),
-                          label: const Text('Retry'),
-                        ),
-                      ],
+                  return EmptyStateWidget(
+                    icon: Icons.error_outline,
+                    title: 'Error loading faculty',
+                    message: provider.error!,
+                    action: ElevatedButton.icon(
+                      onPressed: () => provider.loadFaculty(),
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Retry'),
                     ),
                   );
                 }
@@ -142,38 +128,86 @@ class _FacultyListScreenState extends State<FacultyListScreen> {
                 final filteredFaculty = provider.filteredFaculty;
 
                 if (filteredFaculty.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.people_outline,
-                          size: 64,
-                          color: theme.colorScheme.secondary,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          provider.searchQuery.isNotEmpty
-                              ? 'No faculty found matching "${provider.searchQuery}"'
-                              : 'No faculty members found',
-                          style: theme.textTheme.titleMedium,
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
+                  return EmptyStateWidget(
+                    icon: Icons.people_outline,
+                    title: provider.searchQuery.isNotEmpty
+                        ? 'No faculty found'
+                        : 'No faculty members found',
+                    message: provider.searchQuery.isNotEmpty
+                        ? 'Try adjusting your search'
+                        : 'Faculty will appear here',
                   );
                 }
 
-                return RefreshIndicator(
+                return CustomPullToRefresh(
                   onRefresh: () => provider.refresh(),
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: filteredFaculty.length,
-                    itemBuilder: (context, index) {
-                      final faculty = filteredFaculty[index];
-                      return _FacultyCard(faculty: faculty);
-                    },
-                  ),
+                  child: _isGridView
+                      ? AnimationLimiter(
+                          child: GridView.builder(
+                            padding: EdgeInsets.all(AppDecorations.spaceMD),
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              childAspectRatio: 0.75,
+                              crossAxisSpacing: 12,
+                              mainAxisSpacing: 12,
+                            ),
+                            itemCount: filteredFaculty.length,
+                            itemBuilder: (context, index) {
+                              final faculty = filteredFaculty[index];
+                              return AnimationConfiguration.staggeredGrid(
+                                position: index,
+                                duration: const Duration(milliseconds: 375),
+                                columnCount: 2,
+                                child: ScaleAnimation(
+                                  child: FadeInAnimation(
+                                    child: EnhancedFacultyCard(
+                                      faculty: faculty,
+                                      isGridView: true,
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => FacultyDetailScreen(faculty: faculty),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        )
+                      : AnimationLimiter(
+                          child: ListView.builder(
+                            padding: EdgeInsets.all(AppDecorations.spaceSM),
+                            itemCount: filteredFaculty.length,
+                            itemBuilder: (context, index) {
+                              final faculty = filteredFaculty[index];
+                              return AnimationConfiguration.staggeredList(
+                                position: index,
+                                duration: const Duration(milliseconds: 375),
+                                child: SlideAnimation(
+                                  verticalOffset: 50.0,
+                                  child: FadeInAnimation(
+                                    child: EnhancedFacultyCard(
+                                      faculty: faculty,
+                                      isGridView: false,
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => FacultyDetailScreen(faculty: faculty),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
                 );
               },
             ),

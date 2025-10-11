@@ -8,18 +8,31 @@ class NotificationRepository {
   // Get notifications for user
   Future<List<AppNotification>> getNotifications(String userId) async {
     try {
+      print('Fetching notifications for user: $userId');
+      
       final response = await _supabase
           .from('notifications')
           .select()
           .eq('user_id', userId)
           .order('sent_at', ascending: false);
 
-      return (response as List)
+      print('Notifications response: $response');
+      
+      if (response == null) {
+        print('Response is null');
+        return [];
+      }
+
+      final notifications = (response as List)
           .map((json) => AppNotification.fromJson(json))
           .toList();
-    } catch (e) {
+      
+      print('Successfully parsed ${notifications.length} notifications');
+      return notifications;
+    } catch (e, stackTrace) {
       print('Error fetching notifications: $e');
-      throw Exception('Failed to load notifications');
+      print('Stack trace: $stackTrace');
+      throw Exception('Failed to load notifications: ${e.toString()}');
     }
   }
 

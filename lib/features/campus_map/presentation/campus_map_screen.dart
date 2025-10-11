@@ -114,14 +114,6 @@ class _CampusMapScreenState extends State<CampusMapScreen> with AutomaticKeepAli
           _currentUserLocation = LatLng(position.latitude, position.longitude);
         });
         _updateMarkers();
-        
-        // Animate to user location
-        _mapController?.animateCamera(
-          CameraUpdate.newLatLngZoom(
-            LatLng(position.latitude, position.longitude),
-            17,
-          ),
-        );
       }
     } catch (e) {
       AppLogger.logError('Failed to get current location', error: e);
@@ -129,6 +121,79 @@ class _CampusMapScreenState extends State<CampusMapScreen> with AutomaticKeepAli
         AppUtils.showSnackBar(
           context,
           'Failed to get your location: ${e.toString()}',
+          isError: true,
+        );
+      }
+    }
+  }
+
+  // Method to move camera to user's current location
+  Future<void> _moveToMyLocation() async {
+    try {
+      // Check if location service is enabled
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        if (mounted) {
+          AppUtils.showSnackBar(
+            context,
+            'Please enable location services',
+            isError: true,
+          );
+          final shouldOpen = await _showLocationServiceDialog();
+          if (shouldOpen) {
+            await Geolocator.openLocationSettings();
+          }
+        }
+        return;
+      }
+
+      // Check permission
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied || 
+          permission == LocationPermission.deniedForever) {
+        if (mounted) {
+          AppUtils.showSnackBar(
+            context,
+            'Location permission required',
+            isError: true,
+          );
+        }
+        return;
+      }
+
+      // Show loading
+      if (mounted) {
+        AppUtils.showSnackBar(context, 'Getting your location...');
+      }
+
+      // Get current position
+      Position position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          distanceFilter: 10,
+        ),
+      );
+
+      final userLocation = LatLng(position.latitude, position.longitude);
+
+      if (mounted) {
+        setState(() {
+          _currentUserLocation = userLocation;
+        });
+        _updateMarkers();
+        
+        // Animate camera to user location
+        final controller = await _controllerCompleter.future;
+        await controller.animateCamera(
+          CameraUpdate.newLatLngZoom(userLocation, 18),
+        );
+      }
+    } catch (e) {
+      AppLogger.logError('Failed to move to current location', error: e);
+      if (mounted) {
+        AppUtils.showSnackBar(
+          context,
+          'Failed to get your location. Please try again.',
           isError: true,
         );
       }
@@ -705,8 +770,8 @@ class _CampusMapScreenState extends State<CampusMapScreen> with AutomaticKeepAli
                           _mapController = controller;
                         },
                         myLocationEnabled: true,
-                        myLocationButtonEnabled: false,
-                        zoomControlsEnabled: true,
+                        myLocationButtonEnabled: false,  // Disable Google's built-in button
+                        zoomControlsEnabled: false,
                         mapToolbarEnabled: false,
                         compassEnabled: true,
                         liteModeEnabled: false,
@@ -752,18 +817,20 @@ class _CampusMapScreenState extends State<CampusMapScreen> with AutomaticKeepAli
                             ),
                           ),
                         ),
-                      // MyLocation Button
+                      // My Location Button - Takes you to YOUR current location
                       Positioned(
                         bottom: _isNavigating ? 80 : 16,
                         right: 16,
                         child: FloatingActionButton(
                           heroTag: 'myLocation',
-                          onPressed: _getCurrentLocation,
+                          onPressed: _moveToMyLocation,
                           backgroundColor: Colors.white,
                           foregroundColor: AppTheme.primaryColor,
+                          tooltip: 'Go to my location',
                           child: const Icon(Icons.my_location),
                         ),
                       ),
+                      // Clear Route Button (only shown when navigating)
                       if (_isNavigating)
                         Positioned(
                           bottom: 16,

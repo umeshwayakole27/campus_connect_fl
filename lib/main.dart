@@ -17,6 +17,7 @@ import 'features/search/presentation/search_provider.dart';
 import 'features/search/presentation/search_screen.dart';
 import 'features/notifications/presentation/notification_provider.dart';
 import 'features/notifications/presentation/notifications_screen.dart';
+import 'features/home/enhanced_home_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -302,94 +303,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildHomePage() {
-    final user = context.watch<AuthProvider>().currentUser;
-    
-    return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.celebration,
-              size: 80,
-              color: AppTheme.primaryColor,
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Welcome, ${user?.name ?? 'User'}!',
-              style: AppTextStyles.heading2,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
-              ),
-              decoration: BoxDecoration(
-                color: user?.isFaculty == true
-                    ? AppTheme.secondaryColor
-                    : AppTheme.primaryColor,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                AppUtils.capitalize(user?.role ?? 'User'),
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            const SizedBox(height: 32),
-            Text(
-              '🎉 Phase 6 Complete! 🎉',
-              style: AppTextStyles.heading3,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: Text(
-                'App Features:\n\n• 🔐 Authentication (Login/Register)\n• 👤 Profile Management\n• 🗺️ Campus Map Navigation\n• 📍 Location Discovery\n• 📅 Event Management\n• 👨‍🏫 Faculty Directory\n• 🔍 Global Search\n• 🔔 Push Notifications',
-                style: AppTextStyles.bodyLarge,
-                textAlign: TextAlign.center,
-              ),
-            ),
-            const SizedBox(height: 32),
-            if (user?.isFaculty == true) ...[
-              Card(
-                color: AppTheme.secondaryColor.withValues(alpha: 0.1),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.admin_panel_settings,
-                        size: 48,
-                        color: AppTheme.secondaryColor,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Faculty Features',
-                        style: AppTextStyles.heading3.copyWith(
-                          color: AppTheme.secondaryColor,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'As a faculty member, you can:\n• Create and manage events\n• Send announcements to all users\n• Update faculty profile\n• View event analytics',
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
+    return const EnhancedHomeScreen();
   }
 
   Widget _buildComingSoonPage(String feature, String phase) {

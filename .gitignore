@@ -11,7 +11,8 @@
 .svn/
 .swiftpm/
 migrate_working_dir/
-
+.context7/
+.context7.json
 # IntelliJ related
 *.iml
 *.ipr

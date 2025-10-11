@@ -44,20 +44,28 @@ class NotificationProvider extends ChangeNotifier {
 
   // Load notifications
   Future<void> loadNotifications(String userId) async {
+    print('NotificationProvider: Loading notifications for userId: $userId');
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
       _notifications = await _repository.getNotifications(userId);
+      print('NotificationProvider: Loaded ${_notifications.length} notifications');
+      
       _unreadCount = await _repository.getUnreadCount(userId);
+      print('NotificationProvider: Unread count: $_unreadCount');
+      
       _error = null;
 
       // Subscribe to real-time updates
       _subscribeToRealtime(userId);
-    } catch (e) {
-      _error = 'Failed to load notifications: ${e.toString()}';
+    } catch (e, stackTrace) {
+      print('NotificationProvider Error: $e');
+      print('Stack trace: $stackTrace');
+      _error = e.toString().replaceAll('Exception: ', '');
       _notifications = [];
+      _unreadCount = 0;
     } finally {
       _isLoading = false;
       notifyListeners();
