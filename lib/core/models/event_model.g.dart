@@ -11,15 +11,15 @@ Event _$EventFromJson(Map<String, dynamic> json) => Event(
   title: json['title'] as String,
   description: json['description'] as String?,
   location: json['location'] as String?,
-  locationId: json['locationId'] as String?,
+  locationId: json['location_id'] as String?,
   time: DateTime.parse(json['time'] as String),
-  createdBy: json['createdBy'] as String,
-  createdAt: json['createdAt'] == null
+  createdBy: json['created_by'] as String?,
+  createdAt: json['created_at'] == null
       ? null
-      : DateTime.parse(json['createdAt'] as String),
-  updatedAt: json['updatedAt'] == null
+      : DateTime.parse(json['created_at'] as String),
+  updatedAt: json['updated_at'] == null
       ? null
-      : DateTime.parse(json['updatedAt'] as String),
+      : DateTime.parse(json['updated_at'] as String),
 );
 
 Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
@@ -27,9 +27,9 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
   'title': instance.title,
   'description': instance.description,
   'location': instance.location,
-  'locationId': instance.locationId,
+  'location_id': instance.locationId,
   'time': instance.time.toIso8601String(),
-  'createdBy': instance.createdBy,
-  'createdAt': instance.createdAt?.toIso8601String(),
-  'updatedAt': instance.updatedAt?.toIso8601String(),
+  'created_by': instance.createdBy,
+  'created_at': instance.createdAt?.toIso8601String(),
+  'updated_at': instance.updatedAt?.toIso8601String(),
 };

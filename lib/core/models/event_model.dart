@@ -9,10 +9,14 @@ class Event extends Equatable {
   final String title;
   final String? description;
   final String? location;
+  @JsonKey(name: 'location_id')
   final String? locationId;
   final DateTime time;
-  final String createdBy;
+  @JsonKey(name: 'created_by')
+  final String? createdBy;
+  @JsonKey(name: 'created_at')
   final DateTime? createdAt;
+  @JsonKey(name: 'updated_at')
   final DateTime? updatedAt;
 
   const Event({
@@ -22,7 +26,7 @@ class Event extends Equatable {
     this.location,
     this.locationId,
     required this.time,
-    required this.createdBy,
+    this.createdBy,
     this.createdAt,
     this.updatedAt,
   });

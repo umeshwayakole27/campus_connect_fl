@@ -8,6 +8,8 @@ import 'core/providers/auth_provider.dart';
 import 'features/auth/presentation/login_screen.dart';
 import 'features/auth/presentation/profile_screen.dart';
 import 'features/campus_map/presentation/campus_map_screen.dart';
+import 'features/events/presentation/event_provider.dart';
+import 'features/events/presentation/events_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -81,6 +83,7 @@ class CampusConnectApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => EventProvider()),
       ],
       child: MaterialApp(
         title: AppConstants.appName,
@@ -224,7 +227,7 @@ class _HomePageState extends State<HomePage> {
       case 1:
         return const CampusMapScreen();
       case 2:
-        return _buildComingSoonPage('Events', 'Phase 4');
+        return const EventsScreen();
       case 3:
         return _buildComingSoonPage('Faculty', 'Phase 5');
       case 4:
@@ -276,7 +279,7 @@ class _HomePageState extends State<HomePage> {
             ),
             const SizedBox(height: 32),
             Text(
-              '🎉 Phase 2 Complete! 🎉',
+              '🎉 Phase 4 Complete! 🎉',
               style: AppTextStyles.heading3,
               textAlign: TextAlign.center,
             ),
@@ -284,7 +287,7 @@ class _HomePageState extends State<HomePage> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
               child: Text(
-                'App Features:\n\n• 🔐 Authentication (Login/Register)\n• 👤 Profile Management\n• 🗺️ Campus Map Navigation\n• 📍 Location Discovery',
+                'App Features:\n\n• 🔐 Authentication (Login/Register)\n• 👤 Profile Management\n• 🗺️ Campus Map Navigation\n• 📍 Location Discovery\n• 📅 Event Management',
                 style: AppTextStyles.bodyLarge,
                 textAlign: TextAlign.center,
               ),
