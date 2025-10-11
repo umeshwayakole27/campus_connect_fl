@@ -8,28 +8,34 @@ part of 'faculty_model.dart';
 
 Faculty _$FacultyFromJson(Map<String, dynamic> json) => Faculty(
   id: json['id'] as String,
-  userId: json['userId'] as String,
-  name: json['name'] as String,
+  userId: json['user_id'] as String,
   department: json['department'] as String,
-  office: json['office'] as String?,
-  officeHours: json['officeHours'] as String?,
-  contactEmail: json['contactEmail'] as String?,
-  createdAt: json['createdAt'] == null
+  designation: json['designation'] as String?,
+  officeLocation: json['office_location'] as String?,
+  officeHours: json['office_hours'] as String?,
+  phone: json['phone'] as String?,
+  researchInterests: (json['research_interests'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
+  createdAt: json['created_at'] == null
       ? null
-      : DateTime.parse(json['createdAt'] as String),
-  updatedAt: json['updatedAt'] == null
+      : DateTime.parse(json['created_at'] as String),
+  updatedAt: json['updated_at'] == null
       ? null
-      : DateTime.parse(json['updatedAt'] as String),
+      : DateTime.parse(json['updated_at'] as String),
+  user: json['user'] as Map<String, dynamic>?,
 );
 
 Map<String, dynamic> _$FacultyToJson(Faculty instance) => <String, dynamic>{
   'id': instance.id,
-  'userId': instance.userId,
-  'name': instance.name,
+  'user_id': instance.userId,
   'department': instance.department,
-  'office': instance.office,
-  'officeHours': instance.officeHours,
-  'contactEmail': instance.contactEmail,
-  'createdAt': instance.createdAt?.toIso8601String(),
-  'updatedAt': instance.updatedAt?.toIso8601String(),
+  'designation': instance.designation,
+  'office_location': instance.officeLocation,
+  'office_hours': instance.officeHours,
+  'phone': instance.phone,
+  'research_interests': instance.researchInterests,
+  'created_at': instance.createdAt?.toIso8601String(),
+  'updated_at': instance.updatedAt?.toIso8601String(),
+  'user': instance.user,
 };

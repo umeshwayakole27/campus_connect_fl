@@ -10,6 +10,8 @@ import 'features/auth/presentation/profile_screen.dart';
 import 'features/campus_map/presentation/campus_map_screen.dart';
 import 'features/events/presentation/event_provider.dart';
 import 'features/events/presentation/events_screen.dart';
+import 'features/faculty/presentation/faculty_provider.dart';
+import 'features/faculty/presentation/faculty_list_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -84,6 +86,7 @@ class CampusConnectApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => EventProvider()),
+        ChangeNotifierProvider(create: (_) => FacultyProvider()),
       ],
       child: MaterialApp(
         title: AppConstants.appName,
@@ -229,7 +232,7 @@ class _HomePageState extends State<HomePage> {
       case 2:
         return const EventsScreen();
       case 3:
-        return _buildComingSoonPage('Faculty', 'Phase 5');
+        return const FacultyListScreen();
       case 4:
         return const ProfileScreen();
       default:

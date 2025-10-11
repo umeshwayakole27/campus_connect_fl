@@ -6,25 +6,43 @@ part 'faculty_model.g.dart';
 @JsonSerializable()
 class Faculty extends Equatable {
   final String id;
+  @JsonKey(name: 'user_id')
   final String userId;
-  final String name;
   final String department;
-  final String? office;
+  final String? designation;
+  @JsonKey(name: 'office_location')
+  final String? officeLocation;
+  @JsonKey(name: 'office_hours')
   final String? officeHours;
-  final String? contactEmail;
+  final String? phone;
+  @JsonKey(name: 'research_interests')
+  final List<String>? researchInterests;
+  @JsonKey(name: 'created_at')
   final DateTime? createdAt;
+  @JsonKey(name: 'updated_at')
   final DateTime? updatedAt;
+  
+  // Nested user data
+  @JsonKey(name: 'user')
+  final Map<String, dynamic>? user;
+  
+  // Getters for user data
+  String? get userName => user?['name'] as String?;
+  String? get userEmail => user?['email'] as String?;
+  String? get userAvatarUrl => user?['avatar_url'] as String?;
 
   const Faculty({
     required this.id,
     required this.userId,
-    required this.name,
     required this.department,
-    this.office,
+    this.designation,
+    this.officeLocation,
     this.officeHours,
-    this.contactEmail,
+    this.phone,
+    this.researchInterests,
     this.createdAt,
     this.updatedAt,
+    this.user,
   });
 
   factory Faculty.fromJson(Map<String, dynamic> json) => _$FacultyFromJson(json);
@@ -33,24 +51,28 @@ class Faculty extends Equatable {
   Faculty copyWith({
     String? id,
     String? userId,
-    String? name,
     String? department,
-    String? office,
+    String? designation,
+    String? officeLocation,
     String? officeHours,
-    String? contactEmail,
+    String? phone,
+    List<String>? researchInterests,
     DateTime? createdAt,
     DateTime? updatedAt,
+    Map<String, dynamic>? user,
   }) {
     return Faculty(
       id: id ?? this.id,
       userId: userId ?? this.userId,
-      name: name ?? this.name,
       department: department ?? this.department,
-      office: office ?? this.office,
+      designation: designation ?? this.designation,
+      officeLocation: officeLocation ?? this.officeLocation,
       officeHours: officeHours ?? this.officeHours,
-      contactEmail: contactEmail ?? this.contactEmail,
+      phone: phone ?? this.phone,
+      researchInterests: researchInterests ?? this.researchInterests,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      user: user ?? this.user,
     );
   }
 
@@ -58,12 +80,14 @@ class Faculty extends Equatable {
   List<Object?> get props => [
     id,
     userId,
-    name,
     department,
-    office,
+    designation,
+    officeLocation,
     officeHours,
-    contactEmail,
+    phone,
+    researchInterests,
     createdAt,
     updatedAt,
+    user,
   ];
 }
