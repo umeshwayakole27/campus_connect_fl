@@ -7,6 +7,25 @@ plugins {
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
+import java.util.Properties
+
+// Load environment variables from .env, preferring project root then android/ fallback
+val envProps = Properties()
+val projectRootEnv = File(rootDir.parentFile ?: rootDir, ".env")
+val androidDirEnv = File(rootDir, ".env")
+val envFile = if (projectRootEnv.exists()) projectRootEnv else androidDirEnv
+
+if (envFile.exists()) {
+    envFile.forEachLine { line ->
+        if (line.isNotBlank() && !line.trim().startsWith("#")) {
+            val parts = line.split("=", limit = 2)
+            if (parts.size == 2) {
+                val (key, value) = parts
+                envProps[key.trim()] = value.trim()
+            }
+        }
+    }
+}
 
 android {
     namespace = "com.campus_connect.geca"
@@ -31,6 +50,17 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+    }
+
+    buildTypes {
+        getByName("debug") {
+            val googleMapsApiKey = envProps.getProperty("GOOGLE_MAPS_API_KEY") ?: ""
+            resValue("string", "google_maps_key", googleMapsApiKey)
+        }
+        getByName("release") {
+            val googleMapsApiKey = envProps.getProperty("GOOGLE_MAPS_API_KEY") ?: ""
+            resValue("string", "google_maps_key", googleMapsApiKey)
+        }
     }
 
     buildTypes {
