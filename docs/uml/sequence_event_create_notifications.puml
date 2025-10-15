@@ -1,0 +1,132 @@
+@startuml sequence_event_create_notifications
+title Faculty Creates Event and Sends Notifications
+
+actor Faculty
+participant "CreateEventScreen" as UI
+participant "EventProvider" as EventProvider
+participant "EventRepository" as EventRepo
+participant "NotificationRepo" as NotifRepo
+database "Supabase DB" as DB
+participant "FCM" as FCM
+
+Faculty -> UI: Fill event details
+activate UI
+
+Faculty -> UI: Select campus location
+UI -> EventProvider: Load locations
+activate EventProvider
+EventProvider -> EventRepo: getLocations()
+activate EventRepo
+EventRepo -> DB: SELECT * FROM campus_locations
+activate DB
+DB --> EventRepo: Location list
+deactivate DB
+EventRepo --> EventProvider: List
+deactivate EventRepo
+EventProvider --> UI: Display locations
+deactivate EventProvider
+
+Faculty -> UI: Choose location
+Faculty -> UI: Tap "Create Event"
+
+UI -> EventProvider: createEvent(eventData)
+activate EventProvider
+
+EventProvider -> EventProvider: Validate data
+EventProvider -> EventProvider: Set loading
+
+EventProvider -> EventRepo: createEvent(eventData)
+activate EventRepo
+
+EventRepo -> DB: INSERT INTO events
+activate DB
+
+alt Event Created
+  DB --> EventRepo: Event record with ID
+  deactivate DB
+  
+  EventRepo --> EventProvider: Event object
+  deactivate EventRepo
+  
+  EventProvider -> EventProvider: Add to list
+  
+  EventProvider -> NotifRepo: sendEventNotification(eventId)
+  activate NotifRepo
+  
+  NotifRepo -> DB: SELECT id FROM users WHERE role='student'
+  activate DB
+  DB --> NotifRepo: Student IDs
+  deactivate DB
+  
+  loop For each student
+    NotifRepo -> DB: INSERT INTO notifications
+    activate DB
+    DB --> NotifRepo: Notification record
+    deactivate DB
+    
+    NotifRepo -> FCM: send(token, title, body, data)
+    activate FCM
+    FCM --> NotifRepo: Message ID
+    deactivate FCM
+  end
+  
+  NotifRepo --> EventProvider: Notifications sent
+  deactivate NotifRepo
+  
+  EventProvider -> EventProvider: Clear loading
+  EventProvider --> UI: Success
+  deactivate EventProvider
+  
+  UI -> UI: Navigate to Events List
+  UI --> Faculty: Success message
+  
+else Database Error
+  DB --> EventRepo: Error
+  EventRepo --> EventProvider: Exception
+  activate EventProvider
+  EventProvider -> EventProvider: Set error
+  EventProvider -> EventProvider: Clear loading
+  EventProvider --> UI: Error
+  deactivate EventProvider
+  
+  UI --> Faculty: Display error
+  
+else RLS Policy Violation
+  DB --> EventRepo: RLS Error
+  EventRepo --> EventProvider: Exception
+  activate EventProvider
+  EventProvider --> UI: Error
+  deactivate EventProvider
+  
+  UI --> Faculty: Display "Unauthorized"
+end
+
+deactivate UI
+
+note right of EventProvider
+  Only faculty can create events
+  Enforced at UI and DB level
+  via RLS policy
+end note
+
+note left of DB
+  RLS Policy:
+  CHECK auth.uid() IN
+  (SELECT id FROM users
+   WHERE role = 'faculty')
+end note
+
+note bottom of FCM
+  Push notifications sent to all students
+  Contains event title, description,
+  and deep link to event details
+end note
+
+note right of NotifRepo
+  Notification creation:
+  1. Create DB record
+  2. Send FCM push
+  DB record persists even if FCM fails
+end note
+
+@enduml

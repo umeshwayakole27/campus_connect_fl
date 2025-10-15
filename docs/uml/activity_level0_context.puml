@@ -1,0 +1,115 @@
+@startuml activity_level0_context
+!theme plain
+title Campus Connect - Level 0 Context Diagram (Activity Diagram)
+
+|Student|
+start
+:Student requests
+authentication, events,
+map, faculty info;
+
+|Campus Connect System|
+:Process user
+authentication;
+
+:Manage events
+and notifications;
+
+:Provide campus
+map and navigation;
+
+:Manage faculty
+information;
+
+:Handle global
+search queries;
+
+|Student|
+:Receive authenticated
+access, event listings,
+map routes, faculty
+directory results;
+
+|#LightBlue|External Systems|
+:Supabase Auth
+validates credentials;
+
+:Supabase DB
+stores/retrieves data;
+
+:Google Maps API
+provides map tiles
+and directions;
+
+:FCM sends push
+notifications;
+
+|Faculty|
+fork
+  :Faculty requests
+  all student features;
+fork again
+  :Faculty creates/edits
+  events and sends
+  announcements;
+end fork
+
+|Campus Connect System|
+:Process faculty-specific
+operations with
+elevated permissions;
+
+|Faculty|
+:Receive event
+management capabilities
+and notification
+broadcast;
+
+stop
+
+note right
+  **System Boundary: Campus Connect**
+  
+  Core Processes:
+  1. Authentication & Authorization
+  2. Event Management
+  3. Campus Map & Navigation
+  4. Faculty Directory Management
+  5. Notification Distribution
+  6. Global Search
+  
+  Role-Based Access Control (RBAC):
+  - Students: Read-only for most data
+  - Faculty: Read/Write for events, announcements
+end note
+
+note left
+  **External Entities:**
+  
+  - Supabase Auth: User authentication
+  - Supabase DB: PostgreSQL database with RLS
+  - Google Maps API: Mapping and directions
+  - Google Directions API: Route calculation
+  - Firebase Cloud Messaging: Push notifications
+  
+  All external APIs require secure
+  API keys stored in environment variables
+end note
+
+floating note
+  **Primary Actors:**
+  
+  **Student:**
+  - Browse events and faculty
+  - Navigate campus
+  - Receive notifications
+  - Search information
+  
+  **Faculty:**
+  - All student capabilities
+  - Create/manage events
+  - Update faculty profile
+  - Send announcements
+end note
+
+@enduml

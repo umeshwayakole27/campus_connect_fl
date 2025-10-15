@@ -1,0 +1,114 @@
+@startuml use_case
+title Campus Connect - Use Case Diagram
+
+actor Student
+actor Faculty
+
+rectangle "Campus Connect System" {
+  usecase (Sign Up) as UC1
+  usecase (Sign In) as UC2
+  usecase (Sign Out) as UC3
+  usecase (Manage Profile) as UC4
+  usecase (View Campus Map) as UC5
+  usecase (Navigate to Location) as UC6
+  usecase (Search Locations) as UC7
+  usecase (View My Location) as UC8
+  usecase (Browse Events) as UC9
+  usecase (Search Events) as UC10
+  usecase (RSVP to Event) as UC11
+  usecase (Create Event) as UC12
+  usecase (Edit Event) as UC13
+  usecase (Delete Event) as UC14
+  usecase (Browse Faculty Directory) as UC15
+  usecase (Search Faculty) as UC16
+  usecase (View Faculty Details) as UC17
+  usecase (Navigate to Office) as UC18
+  usecase (Update Faculty Profile) as UC19
+  usecase (View Notifications) as UC20
+  usecase (Mark Notification as Read) as UC21
+  usecase (Send Announcement) as UC22
+  usecase (Global Search) as UC23
+}
+
+actor "Google Maps API" as GoogleMaps
+actor "Supabase Auth" as SupabaseAuth
+actor "Supabase DB" as SupabaseDB
+actor "Firebase Cloud Messaging" as FCM
+
+' Student relationships
+Student --> UC1
+Student --> UC2
+Student --> UC3
+Student --> UC4
+Student --> UC5
+Student --> UC6
+Student --> UC7
+Student --> UC8
+Student --> UC9
+Student --> UC10
+Student --> UC11
+Student --> UC15
+Student --> UC16
+Student --> UC17
+Student --> UC18
+Student --> UC20
+Student --> UC21
+Student --> UC23
+
+' Faculty relationships
+Faculty --> UC1
+Faculty --> UC2
+Faculty --> UC3
+Faculty --> UC4
+Faculty --> UC5
+Faculty --> UC6
+Faculty --> UC7
+Faculty --> UC8
+Faculty --> UC9
+Faculty --> UC10
+Faculty --> UC12
+Faculty --> UC13
+Faculty --> UC14
+Faculty --> UC15
+Faculty --> UC16
+Faculty --> UC17
+Faculty --> UC18
+Faculty --> UC19
+Faculty --> UC20
+Faculty --> UC21
+Faculty --> UC22
+Faculty --> UC23
+
+' Extensions
+UC6 .> UC5 : <<extends>>
+UC7 .> UC5 : <<extends>>
+UC10 .> UC9 : <<extends>>
+UC16 .> UC15 : <<extends>>
+
+' System interactions
+UC1 ..> SupabaseAuth : <<uses>>
+UC2 ..> SupabaseAuth : <<uses>>
+UC4 ..> SupabaseDB : <<uses>>
+UC5 ..> GoogleMaps : <<uses>>
+UC6 ..> GoogleMaps : <<uses>>
+UC18 ..> GoogleMaps : <<uses>>
+UC12 ..> SupabaseDB : <<uses>>
+UC13 ..> SupabaseDB : <<uses>>
+UC14 ..> SupabaseDB : <<uses>>
+UC22 ..> FCM : <<uses>>
+UC22 ..> SupabaseDB : <<uses>>
+
+note right of Faculty
+  Faculty users have all Student 
+  capabilities plus additional 
+  permissions for event and 
+  announcement management
+end note
+
+note bottom of "Campus Connect System"
+  System follows Role-Based Access Control
+  with Student and Faculty roles enforced
+  at database level via Row Level Security
+end note
+
+@enduml

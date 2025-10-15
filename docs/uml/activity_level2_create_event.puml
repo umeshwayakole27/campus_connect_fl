@@ -1,0 +1,349 @@
+@startuml activity_level2_create_event
+!theme plain
+title Campus Connect - Level 2: Create Event Process (Activity Diagram)
+
+|Faculty UI|
+start
+:Faculty opens
+Create Event screen;
+note right: Entry point from Event Management (P1.4)
+
+|Event Provider|
+:Initialize form state;
+:Load campus locations
+for dropdown;
+note right
+  Input from Location Repository:
+  List<CampusLocation>
+end note
+
+|Faculty UI|
+:Display event
+creation form;
+
+:Faculty enters
+event title;
+note right: Input: Title string
+
+:Faculty enters
+description;
+note right: Input: Description text
+
+:Faculty selects
+event category;
+note right
+  Input: Category selection
+  - Academic
+  - Cultural
+  - Sports
+  - Workshop
+  - Seminar
+  - Other
+end note
+
+:Faculty selects
+campus location;
+note right: Input: Location ID from dropdown
+
+:Faculty picks
+date and time;
+note right: Input: DateTime object
+
+:Faculty optionally
+uploads image;
+note right: Input: Image file (optional)
+
+:Faculty taps
+"Create Event" button;
+
+|Event Provider|
+:Collect form data
+into Event object;
+note right
+  Data aggregation:
+  {
+    title: String,
+    description: String,
+    category: String,
+    location_id: UUID,
+    time: DateTime,
+    image_url: String?
+  }
+end note
+
+:Validate event data;
+
+if (All required fields filled?) then (yes)
+  :Validate date/time
+  is in future;
+  
+  if (Date valid?) then (yes)
+    :Validate title
+    length (min 3 chars);
+    
+    if (Title valid?) then (yes)
+      :Set loading state;
+      
+      |Event Repository|
+      :Get current user ID
+      from auth session;
+      note right: Input: Auth token
+      
+      :Add created_by field
+      to event data;
+      note right: created_by = current_user_id
+      
+      :Prepare database
+      query;
+      note right
+        SQL: INSERT INTO events
+        (id, title, description, 
+        category, location_id, 
+        time, created_by, image_url)
+        VALUES (...)
+      end note
+      
+      |Supabase Database|
+      :Execute RLS check;
+      note left
+        RLS Policy:
+        CHECK (
+          auth.uid() IN (
+            SELECT id FROM users
+            WHERE role = 'faculty'
+          )
+        )
+      end note
+      
+      if (RLS allows?) then (yes - user is faculty)
+        :Execute INSERT
+        statement;
+        
+        :Generate UUID
+        for event ID;
+        
+        :Set timestamps
+        (created_at, updated_at);
+        
+        :Commit transaction;
+        
+        :Return new
+        event record;
+        note left: Output: Event with generated ID
+        
+        |Event Repository|
+        :Parse database
+        response to
+        Event object;
+        
+        :Return Event
+        to provider;
+        
+        |Event Provider|
+        :Add event to
+        local event list;
+        
+        :Trigger notification
+        creation process;
+        
+        |Notification Repository|
+        :Query all student
+        user IDs;
+        note right
+          SQL: SELECT id FROM users
+          WHERE role = 'student'
+        end note
+        
+        |Supabase Database|
+        :Return list of
+        student IDs;
+        note left: Output: List<UUID>
+        
+        |Notification Repository|
+        :Prepare notification
+        data for each student;
+        note right
+          For each student_id:
+          {
+            user_id: UUID,
+            event_id: UUID,
+            type: 'event',
+            title: 'New Event: {title}',
+            message: '{description preview}',
+            read: false
+          }
+        end note
+        
+        :Batch insert
+        notifications;
+        
+        |Supabase Database|
+        :INSERT multiple
+        notification records;
+        :Return success;
+        note left: Output: Notification IDs
+        
+        |Notification Repository|
+        :Prepare FCM
+        push messages;
+        
+        fork
+          :Send FCM notification
+          to Student 1;
+          
+          |Firebase Cloud Messaging|
+          :Deliver push to
+          device token 1;
+          note left: Output: Message ID
+          
+        fork again
+          :Send FCM notification
+          to Student 2;
+          
+          |Firebase Cloud Messaging|
+          :Deliver push to
+          device token 2;
+          
+        fork again
+          :...send to
+          remaining students;
+        end fork
+        
+        |Notification Repository|
+        :Collect FCM
+        send results;
+        :Return success
+        status;
+        
+        |Event Provider|
+        :Clear loading state;
+        :Mark operation
+        as successful;
+        
+        |Faculty UI|
+        :Show success message:
+        "Event created and
+        notifications sent";
+        
+        :Navigate back to
+        Events List screen;
+        
+        :Refresh events list
+        to show new event;
+        
+        stop
+        
+      else (no - not faculty)
+        |Event Repository|
+        :Capture RLS
+        policy violation;
+        
+        :Throw authorization
+        exception;
+        note left: Output: RLS error
+        
+        |Event Provider|
+        :Handle exception;
+        :Set error message;
+        :Clear loading state;
+        
+        |Faculty UI|
+        :Display error alert:
+        "Unauthorized: Faculty
+        access required";
+        
+        stop
+      endif
+      
+    else (no - title too short)
+      |Event Provider|
+      :Set validation error;
+      
+      |Faculty UI|
+      :Show inline error:
+      "Title must be at
+      least 3 characters";
+      
+      stop
+    endif
+    
+  else (no - date in past)
+    |Event Provider|
+    :Set validation error;
+    
+    |Faculty UI|
+    :Show inline error:
+    "Event date must
+    be in the future";
+    
+    stop
+  endif
+  
+else (no - missing required fields)
+  |Event Provider|
+  :Identify missing
+  fields;
+  
+  |Faculty UI|
+  :Highlight missing
+  fields in red;
+  
+  :Show error message:
+  "Please fill all
+  required fields";
+  
+  stop
+endif
+
+floating note right
+  **Level 2 Sub-Processes (P1.4.x):**
+  
+  P1.4.1: Initialize Form
+  P1.4.2: Validate Input Data
+  P1.4.3: Prepare Database Query
+  P1.4.4: Execute RLS-Protected Insert
+  P1.4.5: Create Notification Records
+  P1.4.6: Send FCM Push Notifications
+  P1.4.7: Update UI State
+  
+  **Data Stores:**
+  - D1.1: events table
+  - D1.2: notifications table
+  - D1.3: users table
+  - D1.4: campus_locations table
+end note
+
+floating note left
+  **Database Operations:**
+  
+  1. RLS policy evaluation (automatic)
+  2. Event record insertion
+  3. Student ID retrieval
+  4. Notification batch insertion
+  
+  **Transactions:**
+  All operations are atomic.
+  If notification creation fails,
+  event is still created.
+end note
+
+floating note bottom
+  **Push Notification Delivery:**
+  
+  - Sent to all student device tokens
+  - Includes event ID for deep linking
+  - Fallback: In-app notification center
+  - Batched for performance
+  
+  **Notification Payload:**
+  {
+    "title": "New Event: {title}",
+    "body": "{description preview}",
+    "data": {
+      "event_id": "{uuid}",
+      "type": "event"
+    }
+  }
+end note
+
+@enduml
