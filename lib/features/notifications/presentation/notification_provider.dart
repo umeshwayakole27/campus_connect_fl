@@ -36,33 +36,33 @@ class NotificationProvider extends ChangeNotifier {
       // Subscribe to general topics
       await _fcmService.subscribeToTopic('all_users');
       
-      print('FCM initialized and subscribed to topics');
+      debugPrint('FCM initialized and subscribed to topics');
     } catch (e) {
-      print('Error initializing FCM: $e');
+      debugPrint('Error initializing FCM: $e');
     }
   }
 
   // Load notifications
   Future<void> loadNotifications(String userId) async {
-    print('NotificationProvider: Loading notifications for userId: $userId');
+    debugPrint('NotificationProvider: Loading notifications for userId: $userId');
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
       _notifications = await _repository.getNotifications(userId);
-      print('NotificationProvider: Loaded ${_notifications.length} notifications');
+      debugPrint('NotificationProvider: Loaded ${_notifications.length} notifications');
       
       _unreadCount = await _repository.getUnreadCount(userId);
-      print('NotificationProvider: Unread count: $_unreadCount');
+      debugPrint('NotificationProvider: Unread count: $_unreadCount');
       
       _error = null;
 
       // Subscribe to real-time updates
       _subscribeToRealtime(userId);
     } catch (e, stackTrace) {
-      print('NotificationProvider Error: $e');
-      print('Stack trace: $stackTrace');
+      debugPrint('NotificationProvider Error: $e');
+      debugPrint('Stack trace: $stackTrace');
       _error = e.toString().replaceAll('Exception: ', '');
       _notifications = [];
       _unreadCount = 0;
@@ -89,7 +89,7 @@ class NotificationProvider extends ChangeNotifier {
         notifyListeners();
 
         // Show a snackbar or local notification
-        print('New notification received: ${notification.title}');
+        debugPrint('New notification received: ${notification.title}');
       },
     );
   }
@@ -107,7 +107,7 @@ class NotificationProvider extends ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      print('Error marking as read: $e');
+      debugPrint('Error marking as read: $e');
     }
   }
 
@@ -121,7 +121,7 @@ class NotificationProvider extends ChangeNotifier {
       _unreadCount = 0;
       notifyListeners();
     } catch (e) {
-      print('Error marking all as read: $e');
+      debugPrint('Error marking all as read: $e');
     }
   }
 
@@ -140,7 +140,7 @@ class NotificationProvider extends ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      print('Error deleting notification: $e');
+      debugPrint('Error deleting notification: $e');
       throw Exception('Failed to delete notification');
     }
   }
@@ -162,7 +162,7 @@ class NotificationProvider extends ChangeNotifier {
         message: message,
       );
     } catch (e) {
-      print('Error creating notification: $e');
+      debugPrint('Error creating notification: $e');
       throw Exception('Failed to create notification');
     }
   }
@@ -182,7 +182,7 @@ class NotificationProvider extends ChangeNotifier {
         eventId: eventId,
       );
     } catch (e) {
-      print('Error broadcasting notification: $e');
+      debugPrint('Error broadcasting notification: $e');
       throw Exception('Failed to broadcast notification');
     }
   }

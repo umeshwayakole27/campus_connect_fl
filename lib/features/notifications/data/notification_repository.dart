@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/services/supabase_service.dart';
 import '../../../core/models/notification_model.dart';
@@ -8,30 +9,18 @@ class NotificationRepository {
   // Get notifications for user
   Future<List<AppNotification>> getNotifications(String userId) async {
     try {
-      print('Fetching notifications for user: $userId');
-      
       final response = await _supabase
           .from('notifications')
           .select()
           .eq('user_id', userId)
           .order('sent_at', ascending: false);
 
-      print('Notifications response: $response');
-      
-      if (response == null) {
-        print('Response is null');
-        return [];
-      }
-
       final notifications = (response as List)
           .map((json) => AppNotification.fromJson(json))
           .toList();
       
-      print('Successfully parsed ${notifications.length} notifications');
       return notifications;
-    } catch (e, stackTrace) {
-      print('Error fetching notifications: $e');
-      print('Stack trace: $stackTrace');
+    } catch (e) {
       throw Exception('Failed to load notifications: ${e.toString()}');
     }
   }
@@ -47,7 +36,6 @@ class NotificationRepository {
 
       return (response as List).length;
     } catch (e) {
-      print('Error getting unread count: $e');
       return 0;
     }
   }
@@ -60,7 +48,7 @@ class NotificationRepository {
           .update({'read': true})
           .eq('id', notificationId);
     } catch (e) {
-      print('Error marking notification as read: $e');
+      debugPrint('Error marking notification as read: $e');
       throw Exception('Failed to update notification');
     }
   }
@@ -74,7 +62,7 @@ class NotificationRepository {
           .eq('user_id', userId)
           .eq('read', false);
     } catch (e) {
-      print('Error marking all as read: $e');
+      debugPrint('Error marking all as read: $e');
       throw Exception('Failed to update notifications');
     }
   }
@@ -87,7 +75,7 @@ class NotificationRepository {
           .delete()
           .eq('id', notificationId);
     } catch (e) {
-      print('Error deleting notification: $e');
+      debugPrint('Error deleting notification: $e');
       throw Exception('Failed to delete notification');
     }
   }
@@ -115,7 +103,7 @@ class NotificationRepository {
 
       return AppNotification.fromJson(response);
     } catch (e) {
-      print('Error creating notification: $e');
+      debugPrint('Error creating notification: $e');
       throw Exception('Failed to create notification');
     }
   }
@@ -150,7 +138,7 @@ class NotificationRepository {
           .from('notifications')
           .insert(notifications);
     } catch (e) {
-      print('Error broadcasting notification: $e');
+      debugPrint('Error broadcasting notification: $e');
       throw Exception('Failed to broadcast notification');
     }
   }

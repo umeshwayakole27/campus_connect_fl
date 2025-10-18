@@ -3,7 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'core/constants.dart';
-import 'core/theme.dart';
+import 'core/theme/m3_expressive_theme.dart';
+import 'core/theme/m3_expressive_colors.dart';
+import 'core/theme/m3_expressive_typography.dart';
 import 'core/services/supabase_service.dart';
 import 'core/utils.dart';
 import 'core/providers/auth_provider.dart';
@@ -105,8 +107,8 @@ class CampusConnectApp extends StatelessWidget {
       child: MaterialApp(
         title: AppConstants.appName,
         debugShowCheckedModeBanner: false,
-        theme: AppTheme.lightTheme,
-        darkTheme: AppTheme.darkTheme,
+        theme: M3ExpressiveTheme.light(),
+        darkTheme: M3ExpressiveTheme.dark(),
         themeMode: ThemeMode.system,
         home: const AuthWrapper(),
       ),
@@ -150,19 +152,19 @@ class SplashScreen extends StatelessWidget {
             Icon(
               Icons.school,
               size: 100,
-              color: AppTheme.primaryColor,
+              color: M3ExpressiveColors.primaryBlue,
             ),
             const SizedBox(height: 24),
             Text(
               AppConstants.appName,
-              style: AppTextStyles.heading1.copyWith(
-                color: AppTheme.primaryColor,
+              style: M3ExpressiveTypography.headlineLarge.copyWith(
+                color: M3ExpressiveColors.primaryBlue,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'Version ${AppConstants.appVersion}',
-              style: AppTextStyles.caption,
+              style: M3ExpressiveTypography.bodySmall,
             ),
             const SizedBox(height: 48),
             const CircularProgressIndicator(),
@@ -321,13 +323,13 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(height: 24),
             Text(
               '$feature Coming Soon',
-              style: AppTextStyles.heading2,
+              style: M3ExpressiveTypography.headlineMedium,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
               'This feature will be available in $phase',
-              style: AppTextStyles.bodyMedium.copyWith(
+              style: M3ExpressiveTypography.bodyMedium.copyWith(
                 color: Colors.grey,
               ),
               textAlign: TextAlign.center,

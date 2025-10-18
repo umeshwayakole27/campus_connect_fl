@@ -6,7 +6,6 @@ import 'notification_provider.dart';
 import '../../../core/widgets/loading_widget.dart';
 import '../../../core/widgets/empty_state_widget.dart';
 import '../../../core/models/notification_model.dart';
-import '../../events/presentation/event_detail_screen.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});

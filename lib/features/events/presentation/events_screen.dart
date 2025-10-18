@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import '../../../core/providers/auth_provider.dart';
-import '../../../core/models/event_model.dart';
 import '../../../core/widgets/enhanced_cards.dart';
 import '../../../core/widgets/custom_widgets.dart';
 import '../../../core/widgets/shimmer_loading.dart';

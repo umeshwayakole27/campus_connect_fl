@@ -6,7 +6,6 @@ import '../../../core/widgets/enhanced_cards.dart';
 import '../../../core/widgets/custom_widgets.dart';
 import '../../../core/widgets/shimmer_loading.dart';
 import '../../../core/widgets/empty_state_widget.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_decorations.dart';
 import 'faculty_provider.dart';
 import 'faculty_detail_screen.dart';
