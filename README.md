@@ -1,11 +1,6 @@
 # Campus Connect
 
-**Status**: ✅ **Production Ready (98% Complete)**  
-**Last Updated**: October 19, 2025
-
 A comprehensive Flutter-based mobile application for campus navigation, event discovery, and faculty information management. Built with Flutter, Supabase (PostgreSQL), Google Maps API, and Firebase Cloud Messaging.
-
-> **🎉 The project is complete and ready for deployment!** All core features are implemented, tested, and working perfectly. See [features.md](features.md) for detailed feature list and completion status.
 
 ## 🚀 Features
 
@@ -197,7 +192,7 @@ See [features.md](features.md) for detailed feature list and descriptions.
 
 ## 📚 Documentation
 
-- [features.md](features.md) - Complete feature list and descriptions
+ - [features.md](features.md) - Complete feature list and descriptions 
 - [pubspec.yaml](pubspec.yaml) - Dependencies and project configuration
 
 ## 🔄 Database Schema
@@ -230,7 +225,7 @@ This project is licensed under the MIT License.
 
 ## 👥 Authors
 
-- Your Name - Initial work
+- [umeshwayakole27](https://github.com/umeshwayakole27)- Initial work
 
 ## 🙏 Acknowledgments
 
