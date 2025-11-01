@@ -9,6 +9,7 @@ import 'core/theme/m3_expressive_typography.dart';
 import 'core/services/supabase_service.dart';
 import 'core/utils.dart';
 import 'core/providers/auth_provider.dart';
+import 'core/providers/theme_provider.dart';
 import 'features/auth/presentation/login_screen.dart';
 import 'features/campus_map/presentation/campus_map_screen.dart';
 import 'features/events/presentation/event_provider.dart';
@@ -98,19 +99,24 @@ class CampusConnectApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()..loadThemePreference()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => EventProvider()),
         ChangeNotifierProvider(create: (_) => FacultyProvider()),
         ChangeNotifierProvider(create: (_) => SearchProvider()),
         ChangeNotifierProvider(create: (_) => NotificationProvider()),
       ],
-      child: MaterialApp(
-        title: AppConstants.appName,
-        debugShowCheckedModeBanner: false,
-        theme: M3ExpressiveTheme.light(),
-        darkTheme: M3ExpressiveTheme.dark(),
-        themeMode: ThemeMode.system,
-        home: const AuthWrapper(),
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return MaterialApp(
+            title: AppConstants.appName,
+            debugShowCheckedModeBanner: false,
+            theme: M3ExpressiveTheme.light(),
+            darkTheme: M3ExpressiveTheme.dark(),
+            themeMode: themeProvider.themeMode,
+            home: const AuthWrapper(),
+          );
+        },
       ),
     );
   }
@@ -209,6 +215,16 @@ class _HomePageState extends State<HomePage> {
         appBar: AppBar(
         title: const Text(AppConstants.appName),
         actions: [
+          // Theme toggle button
+          Consumer<ThemeProvider>(
+            builder: (context, themeProvider, child) {
+              return IconButton(
+                icon: Icon(themeProvider.getThemeIcon()),
+                tooltip: themeProvider.getThemeLabel(),
+                onPressed: () => themeProvider.toggleTheme(),
+              );
+            },
+          ),
           // Notifications badge
           Consumer<NotificationProvider>(
             builder: (context, provider, child) {
@@ -256,7 +272,9 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      body: _getSelectedPage(),
+      body: SafeArea(
+        child: _getSelectedPage(),
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: (index) {

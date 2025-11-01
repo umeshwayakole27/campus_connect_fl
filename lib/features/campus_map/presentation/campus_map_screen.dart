@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
 import 'dart:async';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -7,10 +9,18 @@ import '../../../core/models/location_model.dart';
 import '../../../core/theme.dart';
 import '../../../core/utils.dart';
 import '../../../core/services/directions_service.dart';
+import '../../../core/providers/theme_provider.dart';
 import '../data/location_repository.dart';
 
 class CampusMapScreen extends StatefulWidget {
-  const CampusMapScreen({super.key});
+  final LatLng? targetLocation;
+  final String? targetLocationName;
+  
+  const CampusMapScreen({
+    super.key,
+    this.targetLocation,
+    this.targetLocationName,
+  });
 
   @override
   State<CampusMapScreen> createState() => _CampusMapScreenState();
@@ -32,6 +42,10 @@ class _CampusMapScreenState extends State<CampusMapScreen> with AutomaticKeepAli
   LatLng? _currentUserLocation;
   bool _isNavigating = false;
   bool _isFetchingRoute = false;
+  
+  // Map type and style
+  MapType _currentMapType = MapType.normal;
+  String _mapStyleMode = 'auto'; // 'auto', 'light', 'dark'
 
   // Default campus center (GECA Chhatrapati Sambhajinagar campus)
   static const LatLng _campusCenter = LatLng(19.8680502, 75.3241057);
@@ -52,13 +66,99 @@ class _CampusMapScreenState extends State<CampusMapScreen> with AutomaticKeepAli
   @override
   void initState() {
     super.initState();
-    // Load locations asynchronously after build
+    // Load locations and map styles asynchronously after build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_isInitialized) {
         _loadLocations();
         _getCurrentLocation();
+        _loadMapStyles();
+        _handleTargetLocation();
       }
     });
+  }
+  
+  Future<void> _handleTargetLocation() async {
+    if (widget.targetLocation != null) {
+      // Wait for controller to be ready
+      await Future.delayed(const Duration(milliseconds: 500));
+      
+      if (_mapController != null && mounted) {
+        // Add marker for target location
+        setState(() {
+          _markers.add(
+            Marker(
+              markerId: const MarkerId('target_location'),
+              position: widget.targetLocation!,
+              icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
+              infoWindow: InfoWindow(
+                title: widget.targetLocationName ?? 'Target Location',
+                snippet: 'Faculty Office',
+              ),
+            ),
+          );
+        });
+        
+        // Animate camera to target location
+        await _mapController!.animateCamera(
+          CameraUpdate.newLatLngZoom(widget.targetLocation!, 18),
+        );
+        
+        if (mounted) {
+          AppUtils.showSnackBar(
+            context,
+            'Showing ${widget.targetLocationName ?? "location"} on map',
+          );
+        }
+      }
+    }
+  }
+  
+  Future<void> _loadMapStyles() async {
+    try {
+      final lightStyle = await rootBundle.loadString('assets/map_styles/light_style.json');
+      final darkStyle = await rootBundle.loadString('assets/map_styles/dark_style.json');
+      
+      if (mounted) {
+        setState(() {
+          // Store both styles for later use
+          _lightStyle = lightStyle;
+          _darkStyle = darkStyle;
+        });
+        _applyMapStyle();
+      }
+    } catch (e) {
+      AppLogger.logError('Failed to load map styles', error: e);
+    }
+  }
+  
+  String? _lightStyle;
+  String? _darkStyle;
+  
+  Future<void> _applyMapStyle() async {
+    if (_mapController == null) return;
+    
+    try {
+      String? styleToApply;
+      
+      if (_mapStyleMode == 'auto') {
+        // Use app theme
+        final themeProvider = context.read<ThemeProvider>();
+        final isDark = themeProvider.isDarkMode(context);
+        styleToApply = isDark ? _darkStyle : _lightStyle;
+      } else if (_mapStyleMode == 'dark') {
+        styleToApply = _darkStyle;
+      } else if (_mapStyleMode == 'light') {
+        styleToApply = _lightStyle;
+      }
+      
+      if (styleToApply != null) {
+        await _mapController!.setMapStyle(styleToApply);
+      } else {
+        await _mapController!.setMapStyle(null); // Reset to default
+      }
+    } catch (e) {
+      AppLogger.logError('Failed to apply map style', error: e);
+    }
   }
 
   Future<void> _getCurrentLocation() async {
@@ -661,6 +761,255 @@ class _CampusMapScreenState extends State<CampusMapScreen> with AutomaticKeepAli
       ),
     );
   }
+  
+  void _showMapSettings() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => _buildMapSettingsSheet(),
+    );
+  }
+  
+  Widget _buildMapSettingsSheet() {
+    final theme = Theme.of(context);
+    
+    return DraggableScrollableSheet(
+      initialChildSize: 0.5,
+      minChildSize: 0.3,
+      maxChildSize: 0.8,
+      expand: false,
+      builder: (context, scrollController) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return SingleChildScrollView(
+              controller: scrollController,
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Map Settings',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    
+                    // Map Type Section
+                    const Text(
+                      'Map Type',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      children: [
+                        ChoiceChip(
+                          label: const Text('Default'),
+                          selected: _currentMapType == MapType.normal,
+                          labelStyle: TextStyle(
+                            color: _currentMapType == MapType.normal
+                                ? theme.colorScheme.onSecondaryContainer
+                                : theme.colorScheme.onSurface,
+                          ),
+                          selectedColor: theme.colorScheme.secondaryContainer,
+                          backgroundColor: theme.colorScheme.surfaceVariant,
+                          onSelected: (selected) {
+                            if (selected) {
+                              setModalState(() {
+                                _currentMapType = MapType.normal;
+                              });
+                              setState(() {
+                                _currentMapType = MapType.normal;
+                              });
+                            }
+                          },
+                        ),
+                        ChoiceChip(
+                          label: const Text('Satellite'),
+                          selected: _currentMapType == MapType.satellite,
+                          labelStyle: TextStyle(
+                            color: _currentMapType == MapType.satellite
+                                ? theme.colorScheme.onSecondaryContainer
+                                : theme.colorScheme.onSurface,
+                          ),
+                          selectedColor: theme.colorScheme.secondaryContainer,
+                          backgroundColor: theme.colorScheme.surfaceVariant,
+                          onSelected: (selected) {
+                            if (selected) {
+                              setModalState(() {
+                                _currentMapType = MapType.satellite;
+                              });
+                              setState(() {
+                                _currentMapType = MapType.satellite;
+                              });
+                            }
+                          },
+                        ),
+                        ChoiceChip(
+                          label: const Text('Hybrid'),
+                          selected: _currentMapType == MapType.hybrid,
+                          labelStyle: TextStyle(
+                            color: _currentMapType == MapType.hybrid
+                                ? theme.colorScheme.onSecondaryContainer
+                                : theme.colorScheme.onSurface,
+                          ),
+                          selectedColor: theme.colorScheme.secondaryContainer,
+                          backgroundColor: theme.colorScheme.surfaceVariant,
+                          onSelected: (selected) {
+                            if (selected) {
+                              setModalState(() {
+                                _currentMapType = MapType.hybrid;
+                              });
+                              setState(() {
+                                _currentMapType = MapType.hybrid;
+                              });
+                            }
+                          },
+                        ),
+                        ChoiceChip(
+                          label: const Text('Terrain'),
+                          selected: _currentMapType == MapType.terrain,
+                          labelStyle: TextStyle(
+                            color: _currentMapType == MapType.terrain
+                                ? theme.colorScheme.onSecondaryContainer
+                                : theme.colorScheme.onSurface,
+                          ),
+                          selectedColor: theme.colorScheme.secondaryContainer,
+                          backgroundColor: theme.colorScheme.surfaceVariant,
+                          onSelected: (selected) {
+                            if (selected) {
+                              setModalState(() {
+                                _currentMapType = MapType.terrain;
+                              });
+                              setState(() {
+                                _currentMapType = MapType.terrain;
+                              });
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    
+                    // Map Style Section
+                    const Text(
+                      'Map Style',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      children: [
+                        ChoiceChip(
+                          label: const Text('Auto (Follow App Theme)'),
+                          selected: _mapStyleMode == 'auto',
+                          labelStyle: TextStyle(
+                            color: _mapStyleMode == 'auto'
+                                ? theme.colorScheme.onSecondaryContainer
+                                : theme.colorScheme.onSurface,
+                          ),
+                          selectedColor: theme.colorScheme.secondaryContainer,
+                          backgroundColor: theme.colorScheme.surfaceVariant,
+                          onSelected: (selected) {
+                            if (selected) {
+                              setModalState(() {
+                                _mapStyleMode = 'auto';
+                              });
+                              setState(() {
+                                _mapStyleMode = 'auto';
+                              });
+                              _applyMapStyle();
+                            }
+                          },
+                        ),
+                        ChoiceChip(
+                          label: const Text('Light'),
+                          selected: _mapStyleMode == 'light',
+                          labelStyle: TextStyle(
+                            color: _mapStyleMode == 'light'
+                                ? theme.colorScheme.onSecondaryContainer
+                                : theme.colorScheme.onSurface,
+                          ),
+                          selectedColor: theme.colorScheme.secondaryContainer,
+                          backgroundColor: theme.colorScheme.surfaceVariant,
+                          onSelected: (selected) {
+                            if (selected) {
+                              setModalState(() {
+                                _mapStyleMode = 'light';
+                              });
+                              setState(() {
+                                _mapStyleMode = 'light';
+                              });
+                              _applyMapStyle();
+                            }
+                          },
+                        ),
+                        ChoiceChip(
+                          label: const Text('Dark'),
+                          selected: _mapStyleMode == 'dark',
+                          labelStyle: TextStyle(
+                            color: _mapStyleMode == 'dark'
+                                ? theme.colorScheme.onSecondaryContainer
+                                : theme.colorScheme.onSurface,
+                          ),
+                          selectedColor: theme.colorScheme.secondaryContainer,
+                          backgroundColor: theme.colorScheme.surfaceVariant,
+                          onSelected: (selected) {
+                            if (selected) {
+                              setModalState(() {
+                                _mapStyleMode = 'dark';
+                              });
+                              setState(() {
+                                _mapStyleMode = 'dark';
+                              });
+                              _applyMapStyle();
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    
+                    // Close button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('Done'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
 
   Widget _buildCategoryFilter() {
     return SizedBox(
@@ -765,6 +1114,7 @@ class _CampusMapScreenState extends State<CampusMapScreen> with AutomaticKeepAli
                   child: Stack(
                     children: [
                       GoogleMap(
+                        mapType: _currentMapType,
                         initialCameraPosition: const CameraPosition(
                           target: _campusCenter,
                           zoom: 15,
@@ -776,6 +1126,7 @@ class _CampusMapScreenState extends State<CampusMapScreen> with AutomaticKeepAli
                             _controllerCompleter.complete(controller);
                           }
                           _mapController = controller;
+                          _applyMapStyle();
                         },
                         myLocationEnabled: true,
                         myLocationButtonEnabled: false,  // Disable Google's built-in button
@@ -829,13 +1180,27 @@ class _CampusMapScreenState extends State<CampusMapScreen> with AutomaticKeepAli
                       Positioned(
                         bottom: _isNavigating ? 80 : 16,
                         right: 16,
-                        child: FloatingActionButton(
-                          heroTag: 'myLocation',
-                          onPressed: _moveToMyLocation,
-                          backgroundColor: Colors.white,
-                          foregroundColor: AppTheme.primaryColor,
-                          tooltip: 'Go to my location',
-                          child: const Icon(Icons.my_location),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            FloatingActionButton(
+                              heroTag: 'mapSettings',
+                              onPressed: _showMapSettings,
+                              backgroundColor: Colors.white,
+                              foregroundColor: AppTheme.primaryColor,
+                              tooltip: 'Map Settings',
+                              child: const Icon(Icons.layers),
+                            ),
+                            const SizedBox(height: 8),
+                            FloatingActionButton(
+                              heroTag: 'myLocation',
+                              onPressed: _moveToMyLocation,
+                              backgroundColor: Colors.white,
+                              foregroundColor: AppTheme.primaryColor,
+                              tooltip: 'Go to my location',
+                              child: const Icon(Icons.my_location),
+                            ),
+                          ],
                         ),
                       ),
                       // Clear Route Button (only shown when navigating)

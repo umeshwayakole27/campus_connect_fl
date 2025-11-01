@@ -238,7 +238,7 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen>
           crossAxisCount: 2,
           mainAxisSpacing: AppDecorations.spaceMD,
           crossAxisSpacing: AppDecorations.spaceMD,
-          childAspectRatio: 1.5,
+          childAspectRatio: 1.4,
           children: AnimationConfiguration.toStaggeredList(
             duration: const Duration(milliseconds: 375),
             childAnimationBuilder: (widget) => SlideAnimation(
@@ -297,27 +297,30 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen>
   }
 
   Widget _buildQuickActionsSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          padding: EdgeInsets.all(AppDecorations.spaceMD),
-          decoration: BoxDecoration(
-            color: AppColors.primaryBlue.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(AppDecorations.radiusMD),
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: AppDecorations.spaceMD),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: EdgeInsets.all(AppDecorations.spaceMD),
+            decoration: BoxDecoration(
+              color: AppColors.primaryBlue.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(AppDecorations.radiusMD),
+            ),
+            child: Icon(
+              Icons.flash_on,
+              color: AppColors.primaryBlue,
+              size: 24,
+            ),
           ),
-          child: Icon(
-            Icons.flash_on,
-            color: AppColors.primaryBlue,
-            size: 24,
+          SizedBox(height: AppDecorations.spaceSM),
+          Text(
+            'Quick Actions',
+            style: theme_styles.AppTextStyles.h4,
           ),
-        ),
-        SizedBox(height: AppDecorations.spaceSM),
-        Text(
-          'Quick Actions',
-          style: theme_styles.AppTextStyles.h4,
-        ),
-      ],
+        ],
+      ),
     );
   }
 

@@ -458,7 +458,7 @@ class StatsCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.all(AppDecorations.spaceMD),
+        padding: EdgeInsets.all(AppDecorations.spaceXS),
         decoration: AppDecorations.gradientCardDecoration(
           gradient: LinearGradient(
             colors: [
@@ -469,52 +469,53 @@ class StatsCard extends StatelessWidget {
             end: Alignment.bottomRight,
           ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Container(
-                  padding: EdgeInsets.all(AppDecorations.spaceSM),
-                  decoration: BoxDecoration(
-                    color: AppColors.white.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(AppDecorations.radiusSM),
-                  ),
-                  child: Icon(
-                    icon,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(AppDecorations.spaceXS),
+                      decoration: BoxDecoration(
+                        color: AppColors.white.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(AppDecorations.radiusSM),
+                      ),
+                      child: Icon(
+                        icon,
+                        color: AppColors.white,
+                        size: 18,
+                      ),
+                    ),
+                    if (onTap != null)
+                      Icon(
+                        Icons.arrow_forward,
+                        color: AppColors.white.withValues(alpha: 0.7),
+                        size: 16,
+                      ),
+                  ],
+                ),
+                Text(
+                  value,
+                  style: theme_styles.AppTextStyles.h2.copyWith(
                     color: AppColors.white,
-                    size: 24,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                if (onTap != null)
-                  Icon(
-                    Icons.arrow_forward,
-                    color: AppColors.white.withValues(alpha: 0.7),
-                    size: 20,
+                Text(
+                  title,
+                  style: theme_styles.AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.white.withValues(alpha: 0.9),
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ],
-            ),
-            const Spacer(),
-            Text(
-              value,
-              style: theme_styles.AppTextStyles.h1.copyWith(
-                color: AppColors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: AppDecorations.spaceXS),
-            Flexible(
-              child: Text(
-                title,
-                style: theme_styles.AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.white.withValues(alpha: 0.9),
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
+            );
+          },
         ),
       ),
     );

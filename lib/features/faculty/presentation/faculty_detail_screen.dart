@@ -3,6 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/models/faculty_model.dart';
 import '../../../core/providers/auth_provider.dart';
+import '../../../core/utils.dart';
+import '../services/location_resolver_service.dart';
+import '../../campus_map/presentation/campus_map_screen.dart';
 import 'edit_faculty_screen.dart';
 
 class FacultyDetailScreen extends StatelessWidget {
@@ -136,7 +139,7 @@ class FacultyDetailScreen extends StatelessWidget {
                       icon: Icons.location_on_outlined,
                       title: 'Office Location',
                       value: faculty.officeLocation!,
-                      onTap: null, // TODO: Navigate to map in future
+                      onTap: () => _navigateToOfficeLocation(context, faculty.officeLocation!),
                     ),
 
                   // Office Hours
@@ -198,6 +201,56 @@ class FacultyDetailScreen extends StatelessWidget {
     final uri = Uri(scheme: 'tel', path: phone);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
+    }
+  }
+  
+  Future<void> _navigateToOfficeLocation(BuildContext context, String officeLocation) async {
+    // Show loading indicator
+    AppUtils.showSnackBar(context, 'Finding location on map...');
+    
+    try {
+      final locationService = LocationResolverService();
+      final coordinates = await locationService.resolveOfficeLocation(officeLocation);
+      
+      if (coordinates != null) {
+        // Navigate to map screen with the coordinates
+        if (context.mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CampusMapScreen(
+                targetLocation: coordinates,
+                targetLocationName: officeLocation,
+              ),
+            ),
+          );
+        }
+      } else {
+        // Location not found, navigate to map anyway but show message
+        if (context.mounted) {
+          AppUtils.showSnackBar(
+            context,
+            'Location "$officeLocation" not found in campus map',
+            isError: true,
+          );
+          
+          // Still navigate to map for manual search
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const CampusMapScreen(),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        AppUtils.showSnackBar(
+          context,
+          'Failed to locate office: ${e.toString()}',
+          isError: true,
+        );
+      }
     }
   }
 }
