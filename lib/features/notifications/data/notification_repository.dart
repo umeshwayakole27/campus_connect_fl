@@ -108,7 +108,7 @@ class NotificationRepository {
     }
   }
 
-  // Broadcast notification to all users (faculty only)
+  // Broadcast notification to all users via Supabase Edge Functions + FCM (faculty only)
   Future<void> broadcastNotification({
     required String type,
     required String title,
@@ -116,7 +116,32 @@ class NotificationRepository {
     String? eventId,
   }) async {
     try {
-      // Get all user IDs
+      debugPrint('📢 Starting broadcast notification...');
+      debugPrint('📢 Title: $title');
+      debugPrint('📢 Message: $message');
+      debugPrint('📢 Type: $type');
+      
+      // Step 1: Send via Supabase Edge Function (which calls FCM)
+      debugPrint('📢 Calling Supabase Edge Function...');
+      
+      final response = await _supabase.functions.invoke(
+        'send-notification',
+        body: {
+          'title': title,
+          'message': message,
+          'type': type,
+        },
+      );
+      
+      if (response.status == 200) {
+        debugPrint('📢 Supabase response: ${response.data}');
+      } else {
+        debugPrint('⚠️  Supabase response error: ${response.status}');
+      }
+      
+      // Step 2: Save to database for notification history
+      debugPrint('📢 Saving notification history to database...');
+      
       final usersResponse = await _supabase
           .from('users')
           .select('id');
@@ -125,21 +150,45 @@ class NotificationRepository {
           .map((user) => user['id'] as String)
           .toList();
 
-      // Create notification for each user
-      final notifications = userIds.map((userId) => {
-            'user_id': userId,
-            'event_id': eventId,
-            'type': type,
-            'title': title,
-            'message': message,
-          }).toList();
+      debugPrint('📢 Creating history for ${userIds.length} users...');
 
-      await _supabase
-          .from('notifications')
-          .insert(notifications);
+      if (userIds.isNotEmpty) {
+        final notifications = userIds.map((userId) => {
+              'user_id': userId,
+              'event_id': eventId,
+              'type': type,
+              'title': title,
+              'message': message,
+            }).toList();
+
+        await _supabase
+            .from('notifications')
+            .insert(notifications);
+            
+        debugPrint('📢 ✅ Broadcast complete!');
+        debugPrint('📢 Push sent via FCM to all devices');
+        debugPrint('📢 History saved for ${userIds.length} users');
+      } else {
+        debugPrint('⚠️  No users found for history');
+      }
+    } catch (e, stackTrace) {
+      debugPrint('❌ Error broadcasting notification: $e');
+      debugPrint('❌ Stack trace: $stackTrace');
+      throw Exception('Failed to broadcast notification: $e');
+    }
+  }
+  
+  // Store FCM token for user
+  Future<void> saveFCMToken(String userId, String fcmToken, String platform) async {
+    try {
+      await _supabase.from('user_fcm_tokens').upsert({
+        'user_id': userId,
+        'fcm_token': fcmToken,
+        'platform': platform,
+      });
+      debugPrint('✅ FCM token saved for user: $userId');
     } catch (e) {
-      debugPrint('Error broadcasting notification: $e');
-      throw Exception('Failed to broadcast notification');
+      debugPrint('❌ Error saving FCM token: $e');
     }
   }
 

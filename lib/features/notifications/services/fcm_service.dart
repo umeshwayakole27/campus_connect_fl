@@ -1,5 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class FCMService {
   static final FCMService _instance = FCMService._internal();
@@ -107,7 +108,6 @@ class FCMService {
     print('Foreground message received: ${message.messageId}');
 
     final notification = message.notification;
-    final android = message.notification?.android;
 
     if (notification != null) {
       _showLocalNotification(
@@ -196,14 +196,19 @@ class FCMService {
     if (_fcmToken == null) return;
 
     try {
-      // TODO: Send FCM token to Supabase to store for the user
-      // await supabase.from('user_tokens').upsert({
-      //   'user_id': userId,
-      //   'fcm_token': _fcmToken,
-      // });
-      print('FCM token sent to backend for user: $userId');
+      // Import Supabase
+      final supabase = Supabase.instance.client;
+      
+      // Save FCM token to database
+      await supabase.from('user_fcm_tokens').upsert({
+        'user_id': userId,
+        'fcm_token': _fcmToken,
+        'platform': 'android', // You can detect platform dynamically
+      });
+      
+      print('✅ FCM token sent to backend for user: $userId');
     } catch (e) {
-      print('Error sending token to backend: $e');
+      print('❌ Error sending token to backend: $e');
     }
   }
 

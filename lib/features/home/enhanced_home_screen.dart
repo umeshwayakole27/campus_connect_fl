@@ -15,7 +15,9 @@ import '../events/presentation/create_edit_event_screen.dart';
 import '../notifications/presentation/notifications_screen.dart';
 
 class EnhancedHomeScreen extends StatefulWidget {
-  const EnhancedHomeScreen({super.key});
+  final Function(int)? onNavigateToTab;
+  
+  const EnhancedHomeScreen({super.key, this.onNavigateToTab});
 
   @override
   State<EnhancedHomeScreen> createState() => _EnhancedHomeScreenState();
@@ -251,12 +253,18 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen>
                 value: '${eventProvider.events.length}',
                 icon: Icons.event,
                 color: AppColors.primaryBlue,
+                onTap: () {
+                  widget.onNavigateToTab?.call(2); // Navigate to Events tab
+                },
               ),
               StatsCard(
                 title: 'Faculty Members',
                 value: '${facultyProvider.filteredFaculty.length}',
                 icon: Icons.people,
                 color: AppColors.secondaryGreen,
+                onTap: () {
+                  widget.onNavigateToTab?.call(3); // Navigate to Faculty tab
+                },
               ),
               StatsCard(
                 title: 'Notifications',
@@ -277,6 +285,9 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen>
                 value: '10+',
                 icon: Icons.location_on,
                 color: AppColors.accentRed,
+                onTap: () {
+                  widget.onNavigateToTab?.call(1); // Navigate to Campus Map tab
+                },
               ),
             ],
           ),

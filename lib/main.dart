@@ -196,8 +196,17 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
+    return PopScope(
+      canPop: _selectedIndex == 0,
+      onPopInvokedWithResult: (bool didPop, dynamic result) {
+        if (!didPop && _selectedIndex != 0) {
+          setState(() {
+            _selectedIndex = 0;
+          });
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
         title: const Text(AppConstants.appName),
         actions: [
           // Notifications badge
@@ -284,6 +293,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
+      ),
     );
   }
 
@@ -305,38 +315,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildHomePage() {
-    return const EnhancedHomeScreen();
-  }
-
-  Widget _buildComingSoonPage(String feature, String phase) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.construction,
-              size: 80,
-              color: Colors.grey.shade400,
-            ),
-            const SizedBox(height: 24),
-            Text(
-              '$feature Coming Soon',
-              style: M3ExpressiveTypography.headlineMedium,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'This feature will be available in $phase',
-              style: M3ExpressiveTypography.bodyMedium.copyWith(
-                color: Colors.grey,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
+    return EnhancedHomeScreen(
+      onNavigateToTab: (index) {
+        setState(() {
+          _selectedIndex = index;
+        });
+      },
     );
   }
 }

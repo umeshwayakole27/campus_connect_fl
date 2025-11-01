@@ -686,6 +686,14 @@ class _CampusMapScreenState extends State<CampusMapScreen> with AutomaticKeepAli
                 });
                 _updateMarkers();
               },
+              labelStyle: TextStyle(
+                color: isSelected 
+                  ? Theme.of(context).colorScheme.primary 
+                  : Theme.of(context).colorScheme.onSurface,
+              ),
+              backgroundColor: Theme.of(context).brightness == Brightness.light
+                ? Colors.grey[200]
+                : Colors.grey[800],
               selectedColor: AppTheme.primaryColor.withValues(alpha: 0.2),
               checkmarkColor: AppTheme.primaryColor,
             ),

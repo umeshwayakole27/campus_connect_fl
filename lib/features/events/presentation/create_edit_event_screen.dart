@@ -26,7 +26,6 @@ class _CreateEditEventScreenState extends State<CreateEditEventScreen> {
   TimeOfDay? _selectedTime;
   CampusLocation? _selectedLocation;
   List<CampusLocation> _campusLocations = [];
-  bool _isLoadingLocations = false;
 
   bool get isEditMode => widget.event != null;
 
@@ -45,7 +44,6 @@ class _CreateEditEventScreenState extends State<CreateEditEventScreen> {
   }
 
   Future<void> _loadCampusLocations() async {
-    setState(() => _isLoadingLocations = true);
     try {
       final repository = LocationRepository();
       _campusLocations = await repository.getAllLocations();
@@ -54,10 +52,6 @@ class _CreateEditEventScreenState extends State<CreateEditEventScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to load locations: $e')),
         );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoadingLocations = false);
       }
     }
   }

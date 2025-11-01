@@ -188,7 +188,6 @@ class EventProvider with ChangeNotifier {
           e.time.isAfter(today) && e.time.isBefore(tomorrow)
         ).toList();
       case EventFilter.all:
-      default:
         return _events;
     }
   }

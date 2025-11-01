@@ -174,6 +174,9 @@ class NotificationProvider extends ChangeNotifier {
     required String message,
     String? eventId,
   }) async {
+    debugPrint('📢 NotificationProvider: Broadcasting notification...');
+    debugPrint('📢 Type: $type, Title: $title, Message: $message');
+    
     try {
       await _repository.broadcastNotification(
         type: type,
@@ -181,9 +184,11 @@ class NotificationProvider extends ChangeNotifier {
         message: message,
         eventId: eventId,
       );
-    } catch (e) {
-      debugPrint('Error broadcasting notification: $e');
-      throw Exception('Failed to broadcast notification');
+      debugPrint('📢 NotificationProvider: Broadcast successful!');
+    } catch (e, stackTrace) {
+      debugPrint('❌ NotificationProvider: Error broadcasting notification: $e');
+      debugPrint('❌ Stack trace: $stackTrace');
+      throw Exception('Failed to broadcast notification: $e');
     }
   }
 

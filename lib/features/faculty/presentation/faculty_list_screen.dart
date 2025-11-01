@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
-import '../../../core/models/faculty_model.dart';
 import '../../../core/widgets/enhanced_cards.dart';
 import '../../../core/widgets/custom_widgets.dart';
 import '../../../core/widgets/shimmer_loading.dart';
@@ -37,8 +36,6 @@ class _FacultyListScreenState extends State<FacultyListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Faculty Directory'),
@@ -263,123 +260,5 @@ class _FacultyListScreenState extends State<FacultyListScreen> {
         );
       },
     );
-  }
-}
-
-class _FacultyCard extends StatelessWidget {
-  final Faculty faculty;
-
-  const _FacultyCard({required this.faculty});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => FacultyDetailScreen(faculty: faculty),
-            ),
-          );
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              // Avatar
-              CircleAvatar(
-                radius: 32,
-                backgroundColor: theme.colorScheme.primaryContainer,
-                backgroundImage: faculty.userAvatarUrl != null
-                    ? NetworkImage(faculty.userAvatarUrl!)
-                    : null,
-                child: faculty.userAvatarUrl == null
-                    ? Text(
-                        _getInitials(faculty.userName ?? 'Faculty'),
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.onPrimaryContainer,
-                        ),
-                      )
-                    : null,
-              ),
-              const SizedBox(width: 16),
-              
-              // Info
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      faculty.userName ?? 'Unknown',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    if (faculty.designation != null) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        faculty.designation!,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.primary,
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: 4),
-                    Text(
-                      faculty.department,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.secondary,
-                      ),
-                    ),
-                    if (faculty.officeLocation != null) ...[
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.location_on_outlined,
-                            size: 16,
-                            color: theme.colorScheme.secondary,
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              faculty.officeLocation!,
-                              style: theme.textTheme.bodySmall,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              
-              // Arrow
-              Icon(
-                Icons.chevron_right,
-                color: theme.colorScheme.secondary,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  String _getInitials(String name) {
-    final parts = name.trim().split(' ');
-    if (parts.length >= 2) {
-      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
-    }
-    return name.substring(0, name.length > 2 ? 2 : name.length).toUpperCase();
   }
 }

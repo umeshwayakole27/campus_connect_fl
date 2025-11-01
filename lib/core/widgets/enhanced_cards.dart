@@ -29,7 +29,6 @@ class _EnhancedEventCardState extends State<EnhancedEventCard>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
-  bool _isPressed = false;
 
   @override
   void initState() {
@@ -50,18 +49,15 @@ class _EnhancedEventCardState extends State<EnhancedEventCard>
   }
 
   void _handleTapDown(TapDownDetails details) {
-    setState(() => _isPressed = true);
     _controller.forward();
   }
 
   void _handleTapUp(TapUpDetails details) {
-    setState(() => _isPressed = false);
     _controller.reverse();
     widget.onTap();
   }
 
   void _handleTapCancel() {
-    setState(() => _isPressed = false);
     _controller.reverse();
   }
 
@@ -508,10 +504,14 @@ class StatsCard extends StatelessWidget {
               ),
             ),
             SizedBox(height: AppDecorations.spaceXS),
-            Text(
-              title,
-              style: theme_styles.AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.white.withValues(alpha: 0.9),
+            Flexible(
+              child: Text(
+                title,
+                style: theme_styles.AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.white.withValues(alpha: 0.9),
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],

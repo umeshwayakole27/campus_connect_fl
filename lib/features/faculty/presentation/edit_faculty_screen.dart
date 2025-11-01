@@ -47,8 +47,6 @@ class _EditFacultyScreenState extends State<EditFacultyScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Edit Profile'),

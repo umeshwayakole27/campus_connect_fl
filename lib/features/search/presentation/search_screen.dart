@@ -113,6 +113,15 @@ class _SearchScreenState extends State<SearchScreen> {
                         onSelected: (selected) {
                           searchProvider.setCategory(category);
                         },
+                        labelStyle: TextStyle(
+                          color: isSelected 
+                            ? Theme.of(context).colorScheme.onPrimary 
+                            : Theme.of(context).colorScheme.onSurface,
+                        ),
+                        backgroundColor: Theme.of(context).brightness == Brightness.light
+                          ? Colors.grey[200]
+                          : Colors.grey[800],
+                        selectedColor: Theme.of(context).colorScheme.primary,
                       ),
                     );
                   }).toList(),
@@ -223,6 +232,12 @@ class _SearchScreenState extends State<SearchScreen> {
                     _searchController.text = query;
                     searchProvider.search(query);
                   },
+                  labelStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                  backgroundColor: Theme.of(context).brightness == Brightness.light
+                    ? Colors.grey[200]
+                    : Colors.grey[800],
                 )).toList(),
           ),
         ],
