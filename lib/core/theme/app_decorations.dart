@@ -27,24 +27,60 @@ class AppDecorations {
   static const double spaceXXL = 48.0;
   
   // Card Decorations
-  static BoxDecoration cardDecoration({Color? color}) => BoxDecoration(
-    color: color ?? AppColors.white,
+  static BoxDecoration cardDecoration({Color? color, required BuildContext context}) => BoxDecoration(
+    color: color ?? Theme.of(context).colorScheme.surfaceContainerHighest,
     borderRadius: borderRadiusMD,
-    boxShadow: AppColors.cardShadow,
+    boxShadow: [
+      BoxShadow(
+        color: Theme.of(context).colorScheme.shadow.withOpacity(0.1),
+        blurRadius: 8,
+        offset: const Offset(0, 2),
+      ),
+      BoxShadow(
+        color: Theme.of(context).colorScheme.shadow.withOpacity(0.05),
+        blurRadius: 4,
+        offset: const Offset(0, 1),
+      ),
+    ],
   );
   
-  static BoxDecoration elevatedCardDecoration({Color? color}) => BoxDecoration(
-    color: color ?? AppColors.white,
+  static BoxDecoration elevatedCardDecoration({Color? color, required BuildContext context}) => BoxDecoration(
+    color: color ?? Theme.of(context).colorScheme.surfaceContainerHighest,
     borderRadius: borderRadiusMD,
-    boxShadow: AppColors.elevatedShadow,
+    boxShadow: [
+      BoxShadow(
+        color: Theme.of(context).colorScheme.shadow.withOpacity(0.15),
+        blurRadius: 12,
+        offset: const Offset(0, 4),
+      ),
+      BoxShadow(
+        color: Theme.of(context).colorScheme.shadow.withOpacity(0.08),
+        blurRadius: 6,
+        offset: const Offset(0, 2),
+      ),
+    ],
   );
   
   static BoxDecoration gradientCardDecoration({
     required Gradient gradient,
+    BuildContext? context,
   }) => BoxDecoration(
     gradient: gradient,
     borderRadius: borderRadiusMD,
-    boxShadow: AppColors.cardShadow,
+    boxShadow: context != null 
+      ? [
+          BoxShadow(
+            color: Theme.of(context).colorScheme.shadow.withOpacity(0.12),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+          BoxShadow(
+            color: Theme.of(context).colorScheme.shadow.withOpacity(0.06),
+            blurRadius: 5,
+            offset: const Offset(0, 1),
+          ),
+        ]
+      : AppColors.cardShadow,
   );
   
   // Input Decorations

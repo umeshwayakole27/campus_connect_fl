@@ -36,6 +36,7 @@ class _M3ExpressiveCardState extends State<M3ExpressiveCard>
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   late Animation<double> _elevationAnimation;
+  bool _isHovered = false;
   
   @override
   void initState() {

@@ -84,8 +84,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   
                   Text(
                     'Welcome back! Please login to continue.',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: Colors.grey,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -154,17 +154,17 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed: authProvider.isLoading ? null : _handleLogin,
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 16),
-                          backgroundColor: AppTheme.primaryColor,
-                          foregroundColor: Colors.white,
+                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          foregroundColor: Theme.of(context).colorScheme.onPrimary,
                         ),
                         child: authProvider.isLoading
-                            ? const SizedBox(
+                            ? SizedBox(
                                 height: 20,
                                 width: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
                                   valueColor: AlwaysStoppedAnimation<Color>(
-                                    Colors.white,
+                                    Theme.of(context).colorScheme.onPrimary,
                                   ),
                                 ),
                               )

@@ -118,9 +118,7 @@ class _SearchScreenState extends State<SearchScreen> {
                             ? Theme.of(context).colorScheme.onPrimary 
                             : Theme.of(context).colorScheme.onSurface,
                         ),
-                        backgroundColor: Theme.of(context).brightness == Brightness.light
-                          ? Colors.grey[200]
-                          : Colors.grey[800],
+                        backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
                         selectedColor: Theme.of(context).colorScheme.primary,
                       ),
                     );
@@ -235,9 +233,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   labelStyle: TextStyle(
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
-                  backgroundColor: Theme.of(context).brightness == Brightness.light
-                    ? Colors.grey[200]
-                    : Colors.grey[800],
+                  backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
                 )).toList(),
           ),
         ],
@@ -394,7 +390,7 @@ class _SearchScreenState extends State<SearchScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
-              color: Colors.grey[300],
+              color: Theme.of(context).colorScheme.surfaceVariant,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(

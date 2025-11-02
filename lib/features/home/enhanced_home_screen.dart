@@ -119,11 +119,11 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen>
               end: Alignment.bottomRight,
               colors: [
                 user?.isFaculty == true
-                    ? AppColors.secondaryGreen
-                    : AppColors.primaryBlue,
+                    ? Theme.of(context).colorScheme.secondary
+                    : Theme.of(context).colorScheme.primary,
                 user?.isFaculty == true
-                    ? AppColors.secondaryDark
-                    : AppColors.primaryDark,
+                    ? Theme.of(context).colorScheme.secondaryContainer
+                    : Theme.of(context).colorScheme.primaryContainer,
               ],
             ),
           ),
@@ -142,14 +142,14 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen>
                           Text(
                             _getGreeting(),
                             style: theme_styles.AppTextStyles.bodyMedium.copyWith(
-                              color: AppColors.white.withValues(alpha: 0.9),
+                              color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.9),
                             ),
                           ),
                           SizedBox(height: AppDecorations.spaceXS),
                           Text(
                             user?.name ?? 'User',
                             style: theme_styles.AppTextStyles.h2.copyWith(
-                              color: AppColors.white,
+                              color: Theme.of(context).colorScheme.onPrimary,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -169,16 +169,16 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen>
                         width: 56,
                         height: 56,
                         decoration: BoxDecoration(
-                          color: AppColors.white.withValues(alpha: 0.3),
+                          color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.3),
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: AppColors.white,
+                            color: Theme.of(context).colorScheme.onPrimary,
                             width: 2,
                           ),
                         ),
                         child: Icon(
                           Icons.person,
-                          color: AppColors.white,
+                          color: Theme.of(context).colorScheme.onPrimary,
                           size: 28,
                         ),
                       ),
@@ -192,7 +192,7 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen>
                     vertical: AppDecorations.spaceXS,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.white.withValues(alpha: 0.2),
+                    color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(AppDecorations.radiusCircle),
                   ),
                   child: Row(
@@ -203,13 +203,13 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen>
                             ? Icons.school
                             : Icons.person_outline,
                         size: 16,
-                        color: AppColors.white,
+                        color: Theme.of(context).colorScheme.onPrimary,
                       ),
                       SizedBox(width: AppDecorations.spaceXS),
                       Text(
                         user?.isFaculty == true ? 'Faculty' : 'Student',
                         style: theme_styles.AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.white,
+                          color: Theme.of(context).colorScheme.onPrimary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -252,7 +252,7 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen>
                 title: 'Upcoming Events',
                 value: '${eventProvider.events.length}',
                 icon: Icons.event,
-                color: AppColors.primaryBlue,
+                color: Theme.of(context).colorScheme.primary,
                 onTap: () {
                   widget.onNavigateToTab?.call(2); // Navigate to Events tab
                 },
@@ -261,7 +261,7 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen>
                 title: 'Faculty Members',
                 value: '${facultyProvider.filteredFaculty.length}',
                 icon: Icons.people,
-                color: AppColors.secondaryGreen,
+                color: Theme.of(context).colorScheme.secondary,
                 onTap: () {
                   widget.onNavigateToTab?.call(3); // Navigate to Faculty tab
                 },
@@ -270,7 +270,7 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen>
                 title: 'Notifications',
                 value: '${notificationProvider.unreadCount}',
                 icon: Icons.notifications,
-                color: AppColors.accentOrange,
+                color: Theme.of(context).colorScheme.tertiary,
                 onTap: () {
                   Navigator.push(
                     context,

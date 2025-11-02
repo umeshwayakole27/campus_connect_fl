@@ -133,8 +133,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       background: Container(
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 16.0),
-        color: Colors.red,
-        child: const Icon(Icons.delete, color: Colors.white),
+        color: theme.colorScheme.error,
+        child: Icon(Icons.delete, color: theme.colorScheme.onError),
       ),
       confirmDismiss: (direction) async {
         return await showDialog(
@@ -162,16 +162,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         );
       },
       child: Card(
-        elevation: isUnread ? 2 : 0,
+        elevation: 4,
         color: isUnread
-            ? theme.colorScheme.primaryContainer.withOpacity(0.1)
-            : null,
+            ? theme.colorScheme.primaryContainer.withOpacity(0.15)
+            : theme.colorScheme.surfaceContainerHighest,
         child: ListTile(
           leading: CircleAvatar(
             backgroundColor: _getNotificationColor(notification.type, theme),
             child: Icon(
               _getNotificationIcon(notification.type),
-              color: Colors.white,
+              color: theme.colorScheme.onPrimary,
             ),
           ),
           title: Row(
@@ -179,7 +179,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               Expanded(
                 child: Text(
                   notification.message,
-                  style: TextStyle(
+                  style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: isUnread ? FontWeight.bold : FontWeight.normal,
                   ),
                 ),
@@ -249,13 +249,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     ],
                   ),
                 ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'delete',
                 child: Row(
                   children: [
-                    Icon(Icons.delete, color: Colors.red),
-                    SizedBox(width: 8),
-                    Text('Delete', style: TextStyle(color: Colors.red)),
+                    Icon(Icons.delete, color: theme.colorScheme.error),
+                    const SizedBox(width: 8),
+                    Text('Delete', style: TextStyle(color: theme.colorScheme.error)),
                   ],
                 ),
               ),
@@ -295,7 +295,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       case 'reminder':
         return theme.colorScheme.tertiary;
       default:
-        return Colors.grey;
+        return theme.colorScheme.outline;
     }
   }
 

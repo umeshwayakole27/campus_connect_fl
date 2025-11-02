@@ -553,7 +553,7 @@ class QuickActionButton extends StatelessWidget {
       borderRadius: BorderRadius.circular(AppDecorations.radiusMD),
       child: Container(
         padding: EdgeInsets.all(AppDecorations.spaceMD),
-        decoration: AppDecorations.cardDecoration(),
+        decoration: AppDecorations.cardDecoration(context: context),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

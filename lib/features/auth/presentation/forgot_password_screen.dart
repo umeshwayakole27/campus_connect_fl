@@ -79,8 +79,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 
                 Text(
                   'Enter your email address and we\'ll send you a link to reset your password.',
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: Colors.grey,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -106,17 +106,17 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           : _handleResetPassword,
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        backgroundColor: AppTheme.primaryColor,
-                        foregroundColor: Colors.white,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
                       ),
                       child: authProvider.isLoading
-                          ? const SizedBox(
+                          ? SizedBox(
                               height: 20,
                               width: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
                                 valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.white,
+                                  Theme.of(context).colorScheme.onPrimary,
                                 ),
                               ),
                             )

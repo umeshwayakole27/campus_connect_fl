@@ -112,13 +112,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.orange.withValues(alpha: 0.1),
+                color: Theme.of(context).colorScheme.tertiaryContainer.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+                border: Border.all(color: Theme.of(context).colorScheme.tertiary.withValues(alpha: 0.5)),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline, color: Colors.orange[700], size: 20),
+                  Icon(Icons.info_outline, color: Theme.of(context).colorScheme.tertiary, size: 20),
                   const SizedBox(width: 8),
                   const Expanded(
                     child: Text(
@@ -333,17 +333,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       onPressed: authProvider.isLoading ? null : _handleRegister,
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        backgroundColor: AppTheme.primaryColor,
-                        foregroundColor: Colors.white,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
                       ),
                       child: authProvider.isLoading
-                          ? const SizedBox(
+                          ? SizedBox(
                               height: 20,
                               width: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
                                 valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.white,
+                                  Theme.of(context).colorScheme.onPrimary,
                                 ),
                               ),
                             )

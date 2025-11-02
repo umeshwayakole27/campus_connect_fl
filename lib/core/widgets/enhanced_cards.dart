@@ -79,7 +79,7 @@ class _EnhancedEventCardState extends State<EnhancedEventCard>
             horizontal: AppDecorations.spaceMD,
             vertical: AppDecorations.spaceSM,
           ),
-          decoration: AppDecorations.elevatedCardDecoration(),
+          decoration: AppDecorations.elevatedCardDecoration(context: context),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -95,12 +95,12 @@ class _EnhancedEventCardState extends State<EnhancedEventCard>
                         Container(
                           padding: EdgeInsets.all(AppDecorations.spaceSM),
                           decoration: BoxDecoration(
-                            color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                            color: Theme.of(context).colorScheme.primaryContainer,
                             borderRadius: BorderRadius.circular(AppDecorations.radiusSM),
                           ),
                           child: Icon(
                             Icons.event,
-                            color: AppColors.primaryBlue,
+                            color: Theme.of(context).colorScheme.primary,
                             size: 20,
                           ),
                         ),
@@ -108,7 +108,9 @@ class _EnhancedEventCardState extends State<EnhancedEventCard>
                         Expanded(
                           child: Text(
                             widget.event.title,
-                            style: theme_styles.AppTextStyles.h4,
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -122,7 +124,7 @@ class _EnhancedEventCardState extends State<EnhancedEventCard>
                       Text(
                         widget.event.description!,
                         style: theme_styles.AppTextStyles.bodyMedium.copyWith(
-                          color: AppColors.grey600,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -135,26 +137,26 @@ class _EnhancedEventCardState extends State<EnhancedEventCard>
                         Icon(
                           Icons.calendar_today,
                           size: 16,
-                          color: AppColors.grey500,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                         SizedBox(width: AppDecorations.spaceXS),
                         Text(
                           DateFormat('MMM dd, yyyy').format(eventDate),
                           style: theme_styles.AppTextStyles.bodySmall.copyWith(
-                            color: AppColors.grey600,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
                         SizedBox(width: AppDecorations.spaceMD),
                         Icon(
                           Icons.access_time,
                           size: 16,
-                          color: AppColors.grey500,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                         SizedBox(width: AppDecorations.spaceXS),
                         Text(
                           timeString,
                           style: theme_styles.AppTextStyles.bodySmall.copyWith(
-                            color: AppColors.grey600,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],
@@ -166,14 +168,14 @@ class _EnhancedEventCardState extends State<EnhancedEventCard>
                           Icon(
                             Icons.location_on,
                             size: 16,
-                            color: AppColors.grey500,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                           SizedBox(width: AppDecorations.spaceXS),
                           Expanded(
                             child: Text(
                               widget.event.location!,
                               style: theme_styles.AppTextStyles.bodySmall.copyWith(
-                                color: AppColors.grey600,
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -192,10 +194,10 @@ class _EnhancedEventCardState extends State<EnhancedEventCard>
                       ),
                       decoration: BoxDecoration(
                         color: isPast
-                            ? AppColors.grey300
+                            ? Theme.of(context).colorScheme.surfaceVariant
                             : isUpcoming
-                                ? AppColors.success.withValues(alpha: 0.1)
-                                : AppColors.warning.withValues(alpha: 0.1),
+                                ? Theme.of(context).colorScheme.primaryContainer
+                                : Theme.of(context).colorScheme.tertiaryContainer,
                         borderRadius: BorderRadius.circular(AppDecorations.radiusSM),
                       ),
                       child: Text(
@@ -206,10 +208,10 @@ class _EnhancedEventCardState extends State<EnhancedEventCard>
                                 : 'Today',
                         style: theme_styles.AppTextStyles.labelSmall.copyWith(
                           color: isPast
-                              ? AppColors.grey700
+                              ? Theme.of(context).colorScheme.onSurfaceVariant
                               : isUpcoming
-                                  ? AppColors.success
-                                  : AppColors.warning,
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context).colorScheme.tertiary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -285,7 +287,7 @@ class _EnhancedFacultyCardState extends State<EnhancedFacultyCard>
         },
         onTapCancel: () => _controller.reverse(),
         child: Container(
-          decoration: AppDecorations.cardDecoration(),
+          decoration: AppDecorations.cardDecoration(context: context),
           padding: EdgeInsets.all(AppDecorations.spaceMD),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -293,7 +295,7 @@ class _EnhancedFacultyCardState extends State<EnhancedFacultyCard>
               // Avatar
               CircleAvatar(
                 radius: 40,
-                backgroundColor: AppColors.primaryLight,
+                backgroundColor: Theme.of(context).colorScheme.primaryContainer,
                 child: widget.faculty.userAvatarUrl != null
                     ? ClipOval(
                         child: CachedNetworkImage(
@@ -304,14 +306,14 @@ class _EnhancedFacultyCardState extends State<EnhancedFacultyCard>
                           errorWidget: (context, url, error) => Icon(
                             Icons.person,
                             size: 40,
-                            color: AppColors.white,
+                            color: Theme.of(context).colorScheme.onPrimaryContainer,
                           ),
                         ),
                       )
                     : Icon(
                         Icons.person,
                         size: 40,
-                        color: AppColors.white,
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
                       ),
               ),
               SizedBox(height: AppDecorations.spaceSM),
@@ -319,7 +321,9 @@ class _EnhancedFacultyCardState extends State<EnhancedFacultyCard>
               // Name
               Text(
                 widget.faculty.userName ?? 'Unknown',
-                style: theme_styles.AppTextStyles.h5,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -330,7 +334,7 @@ class _EnhancedFacultyCardState extends State<EnhancedFacultyCard>
               Text(
                 widget.faculty.department,
                 style: theme_styles.AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.grey600,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
                 textAlign: TextAlign.center,
                 maxLines: 1,
@@ -358,12 +362,12 @@ class _EnhancedFacultyCardState extends State<EnhancedFacultyCard>
             horizontal: AppDecorations.spaceMD,
             vertical: AppDecorations.spaceXS,
           ),
-          decoration: AppDecorations.cardDecoration(),
+          decoration: AppDecorations.cardDecoration(context: context),
           child: ListTile(
             contentPadding: EdgeInsets.all(AppDecorations.spaceMD),
             leading: CircleAvatar(
               radius: 30,
-              backgroundColor: AppColors.primaryLight,
+              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
               child: widget.faculty.userAvatarUrl != null
                   ? ClipOval(
                       child: CachedNetworkImage(
@@ -374,19 +378,21 @@ class _EnhancedFacultyCardState extends State<EnhancedFacultyCard>
                         errorWidget: (context, url, error) => Icon(
                           Icons.person,
                           size: 30,
-                          color: AppColors.white,
+                          color: Theme.of(context).colorScheme.onPrimaryContainer,
                         ),
                       ),
                     )
                   : Icon(
                       Icons.person,
                       size: 30,
-                      color: AppColors.white,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
                     ),
             ),
             title: Text(
               widget.faculty.userName ?? 'Unknown',
-              style: theme_styles.AppTextStyles.h5,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -397,7 +403,7 @@ class _EnhancedFacultyCardState extends State<EnhancedFacultyCard>
                 Text(
                   widget.faculty.department,
                   style: theme_styles.AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.grey600,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
                 if (widget.faculty.officeLocation != null && widget.faculty.officeLocation!.isNotEmpty) ...[
@@ -407,14 +413,14 @@ class _EnhancedFacultyCardState extends State<EnhancedFacultyCard>
                       Icon(
                         Icons.location_on,
                         size: 14,
-                        color: AppColors.grey500,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
                           widget.faculty.officeLocation!,
                           style: theme_styles.AppTextStyles.bodySmall.copyWith(
-                            color: AppColors.grey500,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -460,6 +466,7 @@ class StatsCard extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(AppDecorations.spaceXS),
         decoration: AppDecorations.gradientCardDecoration(
+          context: context,
           gradient: LinearGradient(
             colors: [
               color,
@@ -481,19 +488,19 @@ class StatsCard extends StatelessWidget {
                     Container(
                       padding: EdgeInsets.all(AppDecorations.spaceXS),
                       decoration: BoxDecoration(
-                        color: AppColors.white.withValues(alpha: 0.3),
+                        color: Colors.white.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(AppDecorations.radiusSM),
                       ),
                       child: Icon(
                         icon,
-                        color: AppColors.white,
+                        color: Colors.white,
                         size: 18,
                       ),
                     ),
                     if (onTap != null)
                       Icon(
                         Icons.arrow_forward,
-                        color: AppColors.white.withValues(alpha: 0.7),
+                        color: Colors.white.withValues(alpha: 0.7),
                         size: 16,
                       ),
                   ],
@@ -501,14 +508,14 @@ class StatsCard extends StatelessWidget {
                 Text(
                   value,
                   style: theme_styles.AppTextStyles.h2.copyWith(
-                    color: AppColors.white,
+                    color: Colors.white,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
                   title,
                   style: theme_styles.AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.white.withValues(alpha: 0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -543,16 +550,16 @@ class NotificationCard extends StatelessWidget {
     this.type = 'general',
   });
 
-  Color _getTypeColor() {
+  Color _getTypeColor(BuildContext context) {
     switch (type.toLowerCase()) {
       case 'event':
-        return AppColors.primaryBlue;
+        return Theme.of(context).colorScheme.primary;
       case 'announcement':
-        return AppColors.accentOrange;
+        return Theme.of(context).colorScheme.tertiary;
       case 'alert':
-        return AppColors.accentRed;
+        return Theme.of(context).colorScheme.error;
       default:
-        return AppColors.grey500;
+        return Theme.of(context).colorScheme.outline;
     }
   }
 
@@ -592,10 +599,10 @@ class NotificationCard extends StatelessWidget {
       background: Container(
         alignment: Alignment.centerRight,
         padding: EdgeInsets.only(right: AppDecorations.spaceLG),
-        color: AppColors.accentRed,
+        color: Theme.of(context).colorScheme.error,
         child: Icon(
           Icons.delete,
-          color: AppColors.white,
+          color: Theme.of(context).colorScheme.onError,
         ),
       ),
       child: InkWell(
@@ -605,8 +612,11 @@ class NotificationCard extends StatelessWidget {
             horizontal: AppDecorations.spaceMD,
             vertical: AppDecorations.spaceXS,
           ),
-          decoration: AppDecorations.cardDecoration(
-            color: isRead ? AppColors.white : AppColors.primaryLight.withValues(alpha: 0.1),
+          decoration: AppDecorations.elevatedCardDecoration(
+            context: context,
+            color: isRead 
+                ? null  // Use default surfaceContainerHighest
+                : Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.2),
           ),
           child: Padding(
             padding: EdgeInsets.all(AppDecorations.spaceMD),
@@ -617,12 +627,12 @@ class NotificationCard extends StatelessWidget {
                 Container(
                   padding: EdgeInsets.all(AppDecorations.spaceSM),
                   decoration: BoxDecoration(
-                    color: _getTypeColor().withValues(alpha: 0.1),
+                    color: _getTypeColor(context).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(AppDecorations.radiusSM),
                   ),
                   child: Icon(
                     _getTypeIcon(),
-                    color: _getTypeColor(),
+                    color: _getTypeColor(context),
                     size: 24,
                   ),
                 ),
@@ -638,7 +648,7 @@ class NotificationCard extends StatelessWidget {
                           Expanded(
                             child: Text(
                               title,
-                              style: theme_styles.AppTextStyles.h5.copyWith(
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 fontWeight: isRead ? FontWeight.normal : FontWeight.bold,
                               ),
                               maxLines: 1,
@@ -651,7 +661,7 @@ class NotificationCard extends StatelessWidget {
                               height: 8,
                               margin: EdgeInsets.only(left: AppDecorations.spaceXS),
                               decoration: BoxDecoration(
-                                color: AppColors.primaryBlue,
+                                color: Theme.of(context).colorScheme.primary,
                                 shape: BoxShape.circle,
                               ),
                             ),
@@ -660,8 +670,8 @@ class NotificationCard extends StatelessWidget {
                       SizedBox(height: AppDecorations.spaceXS),
                       Text(
                         message,
-                        style: theme_styles.AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.grey600,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -669,8 +679,8 @@ class NotificationCard extends StatelessWidget {
                       SizedBox(height: AppDecorations.spaceXS),
                       Text(
                         timeAgo,
-                        style: theme_styles.AppTextStyles.caption.copyWith(
-                          color: AppColors.grey500,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],

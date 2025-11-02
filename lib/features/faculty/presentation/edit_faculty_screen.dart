@@ -223,9 +223,9 @@ class _EditFacultyScreenState extends State<EditFacultyScreen> {
       if (success) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Profile updated successfully'),
-            backgroundColor: Colors.green,
+          SnackBar(
+            content: const Text('Profile updated successfully'),
+            backgroundColor: Theme.of(context).colorScheme.primary,
           ),
         );
       } else {
@@ -234,7 +234,7 @@ class _EditFacultyScreenState extends State<EditFacultyScreen> {
             content: Text(
               provider.error ?? 'Failed to update profile',
             ),
-            backgroundColor: Colors.red,
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }

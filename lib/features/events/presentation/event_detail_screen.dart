@@ -58,7 +58,10 @@ class EventDetailScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: isPast
-                      ? [Colors.grey[400]!, Colors.grey[600]!]
+                      ? [
+                          theme.colorScheme.surfaceVariant,
+                          theme.colorScheme.outline,
+                        ]
                       : [
                           theme.colorScheme.primary,
                           theme.colorScheme.primaryContainer,
@@ -77,13 +80,13 @@ class EventDetailScreen extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.3),
+                        color: theme.colorScheme.onPrimary.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: const Text(
+                      child: Text(
                         'Your Event',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: isPast ? theme.colorScheme.onSurfaceVariant : theme.colorScheme.onPrimary,
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                         ),
@@ -93,19 +96,21 @@ class EventDetailScreen extends StatelessWidget {
                   Text(
                     event.title,
                     style: theme.textTheme.headlineMedium?.copyWith(
-                      color: Colors.white,
+                      color: isPast ? theme.colorScheme.onSurfaceVariant : theme.colorScheme.onPrimary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      const Icon(Icons.calendar_today, color: Colors.white, size: 20),
+                      Icon(Icons.calendar_today, 
+                        color: isPast ? theme.colorScheme.onSurfaceVariant : theme.colorScheme.onPrimary, 
+                        size: 20),
                       const SizedBox(width: 8),
                       Text(
                         DateFormat('EEEE, MMMM dd, yyyy').format(event.time),
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: isPast ? theme.colorScheme.onSurfaceVariant : theme.colorScheme.onPrimary,
                           fontSize: 16,
                         ),
                       ),
@@ -114,12 +119,14 @@ class EventDetailScreen extends StatelessWidget {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      const Icon(Icons.access_time, color: Colors.white, size: 20),
+                      Icon(Icons.access_time, 
+                        color: isPast ? theme.colorScheme.onSurfaceVariant : theme.colorScheme.onPrimary, 
+                        size: 20),
                       const SizedBox(width: 8),
                       Text(
                         DateFormat('h:mm a').format(event.time),
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: isPast ? theme.colorScheme.onSurfaceVariant : theme.colorScheme.onPrimary,
                           fontSize: 16,
                         ),
                       ),
@@ -231,7 +238,7 @@ class EventDetailScreen extends StatelessWidget {
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
             style: FilledButton.styleFrom(
-              backgroundColor: Colors.red,
+              backgroundColor: Theme.of(context).colorScheme.error,
             ),
             child: const Text('Delete'),
           ),
@@ -248,9 +255,9 @@ class EventDetailScreen extends StatelessWidget {
         );
       } else if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to delete event'),
-            backgroundColor: Colors.red,
+          SnackBar(
+            content: const Text('Failed to delete event'),
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }

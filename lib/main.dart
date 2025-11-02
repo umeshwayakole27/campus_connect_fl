@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:geolocator/geolocator.dart';
 import 'firebase_options.dart';
 import 'core/constants.dart';
 import 'core/theme/m3_expressive_theme.dart';
@@ -194,10 +195,22 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    // Initialize FCM when home page loads
+    // Initialize FCM and request location permission when home page loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<NotificationProvider>().initializeFCM();
+      _requestLocationPermission();
     });
+  }
+
+  Future<void> _requestLocationPermission() async {
+    try {
+      final permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        await Geolocator.requestPermission();
+      }
+    } catch (e) {
+      AppLogger.logError('Failed to request location permission', error: e);
+    }
   }
 
   @override

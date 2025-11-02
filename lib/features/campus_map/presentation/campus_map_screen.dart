@@ -472,7 +472,7 @@ class _CampusMapScreenState extends State<CampusMapScreen> with AutomaticKeepAli
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: Colors.grey[300],
+                      color: Theme.of(context).colorScheme.outlineVariant,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -499,9 +499,8 @@ class _CampusMapScreenState extends State<CampusMapScreen> with AutomaticKeepAli
                           if (location.buildingCode != null)
                             Text(
                               'Code: ${location.buildingCode}',
-                              style: TextStyle(
-                                color: Colors.grey[600],
-                                fontSize: 14,
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
                               ),
                             ),
                         ],
@@ -521,9 +520,8 @@ class _CampusMapScreenState extends State<CampusMapScreen> with AutomaticKeepAli
                   const SizedBox(height: 8),
                   Text(
                     location.description!,
-                    style: TextStyle(
-                      color: Colors.grey[700],
-                      fontSize: 14,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -796,7 +794,7 @@ class _CampusMapScreenState extends State<CampusMapScreen> with AutomaticKeepAli
                         width: 40,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: Colors.grey[300],
+                          color: Theme.of(context).colorScheme.outlineVariant,
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -1040,11 +1038,9 @@ class _CampusMapScreenState extends State<CampusMapScreen> with AutomaticKeepAli
                   ? Theme.of(context).colorScheme.primary 
                   : Theme.of(context).colorScheme.onSurface,
               ),
-              backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.grey[200]
-                : Colors.grey[800],
-              selectedColor: AppTheme.primaryColor.withValues(alpha: 0.2),
-              checkmarkColor: AppTheme.primaryColor,
+              backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+              selectedColor: Theme.of(context).colorScheme.primaryContainer,
+              checkmarkColor: Theme.of(context).colorScheme.primary,
             ),
           );
         },
@@ -1089,7 +1085,7 @@ class _CampusMapScreenState extends State<CampusMapScreen> with AutomaticKeepAli
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                  Icon(Icons.error_outline, size: 64, color: Theme.of(context).colorScheme.error),
                   const SizedBox(height: 16),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -1139,7 +1135,7 @@ class _CampusMapScreenState extends State<CampusMapScreen> with AutomaticKeepAli
                       ),
                       if (_isLoading && !_isInitialized)
                         Container(
-                          color: Colors.white.withValues(alpha: 0.8),
+                          color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
                           child: const Center(
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
@@ -1186,8 +1182,8 @@ class _CampusMapScreenState extends State<CampusMapScreen> with AutomaticKeepAli
                             FloatingActionButton(
                               heroTag: 'mapSettings',
                               onPressed: _showMapSettings,
-                              backgroundColor: Colors.white,
-                              foregroundColor: AppTheme.primaryColor,
+                              backgroundColor: Theme.of(context).colorScheme.surface,
+                              foregroundColor: Theme.of(context).colorScheme.primary,
                               tooltip: 'Map Settings',
                               child: const Icon(Icons.layers),
                             ),
@@ -1195,8 +1191,8 @@ class _CampusMapScreenState extends State<CampusMapScreen> with AutomaticKeepAli
                             FloatingActionButton(
                               heroTag: 'myLocation',
                               onPressed: _moveToMyLocation,
-                              backgroundColor: Colors.white,
-                              foregroundColor: AppTheme.primaryColor,
+                              backgroundColor: Theme.of(context).colorScheme.surface,
+                              foregroundColor: Theme.of(context).colorScheme.primary,
                               tooltip: 'Go to my location',
                               child: const Icon(Icons.my_location),
                             ),
@@ -1213,7 +1209,7 @@ class _CampusMapScreenState extends State<CampusMapScreen> with AutomaticKeepAli
                             onPressed: _clearNavigation,
                             icon: const Icon(Icons.close),
                             label: const Text('Clear Route'),
-                            backgroundColor: Colors.red,
+                            backgroundColor: Theme.of(context).colorScheme.error,
                           ),
                         ),
                     ],

@@ -332,7 +332,7 @@ class _CreateEditEventScreenState extends State<CreateEditEventScreen> {
             content: Text(
               eventProvider.error ?? 'Failed to save event',
             ),
-            backgroundColor: Colors.red,
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }

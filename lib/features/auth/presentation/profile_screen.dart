@@ -55,18 +55,18 @@ class ProfileScreen extends StatelessWidget {
                             height: 120,
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) {
-                              return const Icon(
+                              return Icon(
                                 Icons.person,
                                 size: 60,
-                                color: Colors.white,
+                                color: Theme.of(context).colorScheme.onPrimary,
                               );
                             },
                           ),
                         )
-                      : const Icon(
+                      : Icon(
                           Icons.person,
                           size: 60,
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.onPrimary,
                         ),
                 ),
                 const SizedBox(height: 16),
@@ -92,8 +92,10 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   child: Text(
                     AppUtils.capitalize(user.role),
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: Colors.white,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: user.isFaculty
+                          ? Theme.of(context).colorScheme.onSecondary
+                          : Theme.of(context).colorScheme.onPrimary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -106,6 +108,7 @@ class ProfileScreen extends StatelessWidget {
                   child: Column(
                     children: [
                       _buildInfoCard(
+                        context,
                         icon: Icons.email_outlined,
                         label: 'Email',
                         value: user.email,
@@ -113,6 +116,7 @@ class ProfileScreen extends StatelessWidget {
                       if (user.department != null) ...[
                         const SizedBox(height: 12),
                         _buildInfoCard(
+                          context,
                           icon: Icons.business_outlined,
                           label: 'Department',
                           value: user.department!,
@@ -121,6 +125,7 @@ class ProfileScreen extends StatelessWidget {
                       if (user.office != null) ...[
                         const SizedBox(height: 12),
                         _buildInfoCard(
+                          context,
                           icon: Icons.room_outlined,
                           label: 'Office',
                           value: user.office!,
@@ -129,6 +134,7 @@ class ProfileScreen extends StatelessWidget {
                       if (user.officeHours != null) ...[
                         const SizedBox(height: 12),
                         _buildInfoCard(
+                          context,
                           icon: Icons.schedule_outlined,
                           label: 'Office Hours',
                           value: user.officeHours!,
@@ -164,8 +170,8 @@ class ProfileScreen extends StatelessWidget {
                     icon: const Icon(Icons.logout),
                     label: const Text('Logout'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      foregroundColor: Colors.white,
+                      backgroundColor: Theme.of(context).colorScheme.error,
+                      foregroundColor: Theme.of(context).colorScheme.onError,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 32,
                         vertical: 12,
@@ -182,18 +188,19 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoCard({
+  Widget _buildInfoCard(
+    BuildContext context, {
     required IconData icon,
     required String label,
     required String value,
   }) {
     return Card(
       child: ListTile(
-        leading: Icon(icon, color: AppTheme.primaryColor),
+        leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
         title: Text(
           label,
-          style: AppTextStyles.bodySmall.copyWith(
-            color: Colors.grey,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
         subtitle: Text(
