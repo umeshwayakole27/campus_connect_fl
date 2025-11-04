@@ -379,11 +379,21 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               if (titleController.text.isNotEmpty &&
                   messageController.text.isNotEmpty) {
                 try {
-                  await context.read<NotificationProvider>().broadcastNotification(
+                  final authProvider = context.read<AuthProvider>();
+                  final notificationProvider = context.read<NotificationProvider>();
+                  
+                  await notificationProvider.broadcastNotification(
                         type: selectedType,
                         title: titleController.text,
                         message: messageController.text,
                       );
+                  
+                  // Reload notifications to show the broadcast in sender's inbox
+                  if (authProvider.currentUser != null) {
+                    await notificationProvider.loadNotifications(
+                      authProvider.currentUser!.id,
+                    );
+                  }
                   
                   if (context.mounted) {
                     Navigator.pop(context);
