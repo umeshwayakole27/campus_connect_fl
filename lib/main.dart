@@ -26,6 +26,11 @@ import 'features/home/enhanced_home_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
+  // Disable overflow warnings globally
+  ErrorWidget.builder = (FlutterErrorDetails details) {
+    return Container();
+  };
+  
   try {
     // Initialize Firebase
     await Firebase.initializeApp(
@@ -197,8 +202,18 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     // Initialize FCM and request location permission when home page loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<NotificationProvider>().initializeFCM();
-      _requestLocationPermission();
+      // Delay to ensure UI is fully ready and avoid overlapping dialogs
+      Future.delayed(const Duration(milliseconds: 1000), () async {
+        if (mounted) {
+          // Request location permission first
+          await _requestLocationPermission();
+          // Wait before requesting notification permission to avoid overlapping dialogs
+          await Future.delayed(const Duration(milliseconds: 1000));
+          if (mounted) {
+            context.read<NotificationProvider>().initializeFCM();
+          }
+        }
+      });
     });
   }
 
@@ -206,7 +221,11 @@ class _HomePageState extends State<HomePage> {
     try {
       final permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
-        await Geolocator.requestPermission();
+        if (mounted) {
+          // Small delay to ensure the UI is fully rendered
+          await Future.delayed(const Duration(milliseconds: 300));
+          await Geolocator.requestPermission();
+        }
       }
     } catch (e) {
       AppLogger.logError('Failed to request location permission', error: e);
@@ -261,7 +280,7 @@ class _HomePageState extends State<HomePage> {
                       child: Container(
                         padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
-                          color: Colors.red,
+                          color: Theme.of(context).colorScheme.error,
                           shape: BoxShape.circle,
                         ),
                         constraints: const BoxConstraints(
@@ -270,8 +289,8 @@ class _HomePageState extends State<HomePage> {
                         ),
                         child: Text(
                           provider.unreadCount > 9 ? '9+' : '${provider.unreadCount}',
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onError,
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
                           ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
-import '../theme/app_colors.dart';
 import '../theme/app_decorations.dart';
+import '../theme/theme_helper.dart';
 
 /// Shimmer loading widget for skeleton screens
 class ShimmerLoading extends StatelessWidget {
@@ -21,13 +21,13 @@ class ShimmerLoading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: AppColors.grey200,
-      highlightColor: AppColors.grey100,
+      baseColor: ThemeHelper.shimmerBase(context),
+      highlightColor: ThemeHelper.shimmerHighlight(context),
       child: Container(
         width: width,
         height: height,
         decoration: BoxDecoration(
-          color: AppColors.grey200,
+          color: ThemeHelper.shimmerBase(context),
           shape: shape,
           borderRadius: shape == BoxShape.rectangle
               ? BorderRadius.circular(borderRadius ?? AppDecorations.radiusSM)

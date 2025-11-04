@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
-import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart' as theme_styles;
 import '../theme/app_decorations.dart';
 import '../theme/app_animations.dart';
+import '../theme/theme_helper.dart';
 import '../models/event_model.dart';
 import '../models/faculty_model.dart';
 
@@ -433,7 +433,7 @@ class _EnhancedFacultyCardState extends State<EnhancedFacultyCard>
             ),
             trailing: Icon(
               Icons.chevron_right,
-              color: AppColors.grey400,
+              color: ThemeHelper.iconSecondary(context),
             ),
           ),
         ),

@@ -54,13 +54,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         title: const Text('Forgot Password'),
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
                 const SizedBox(height: 24),
                 
                 Icon(
@@ -127,7 +128,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     );
                   },
                 ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

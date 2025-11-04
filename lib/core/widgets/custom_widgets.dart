@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart' as theme_styles;
 import '../theme/app_decorations.dart';
 import '../theme/app_animations.dart';
+import '../theme/theme_helper.dart';
 
 /// Animated Search Bar with focus animations
 class AnimatedSearchBar extends StatefulWidget {
@@ -77,21 +77,23 @@ class _AnimatedSearchBarState extends State<AnimatedSearchBar>
         autofocus: widget.autofocus,
         onChanged: widget.onChanged,
         onSubmitted: (_) => widget.onSearch?.call(),
-        style: theme_styles.AppTextStyles.bodyLarge,
+        style: theme_styles.AppTextStyles.bodyLarge.copyWith(
+          color: ThemeHelper.textPrimary(context),
+        ),
         decoration: InputDecoration(
           hintText: widget.hintText,
           hintStyle: theme_styles.AppTextStyles.bodyMedium.copyWith(
-            color: AppColors.grey500,
+            color: ThemeHelper.textHint(context),
           ),
           prefixIcon: Icon(
             Icons.search,
-            color: AppColors.grey500,
+            color: ThemeHelper.iconSecondary(context),
           ),
           suffixIcon: widget.controller.text.isNotEmpty
               ? IconButton(
                   icon: Icon(
                     Icons.clear,
-                    color: AppColors.grey500,
+                    color: ThemeHelper.iconSecondary(context),
                   ),
                   onPressed: () {
                     widget.controller.clear();
@@ -100,7 +102,7 @@ class _AnimatedSearchBarState extends State<AnimatedSearchBar>
                 )
               : null,
           filled: true,
-          fillColor: AppColors.grey100,
+          fillColor: ThemeHelper.surfaceVariant(context),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppDecorations.radiusLG),
             borderSide: BorderSide.none,
@@ -112,7 +114,7 @@ class _AnimatedSearchBarState extends State<AnimatedSearchBar>
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppDecorations.radiusLG),
             borderSide: BorderSide(
-              color: AppColors.primaryBlue,
+              color: ThemeHelper.primary(context),
               width: 2,
             ),
           ),
@@ -150,7 +152,9 @@ class AnimatedFilterChip extends StatelessWidget {
         curve: AppAnimations.curveSmooth,
         decoration: AppDecorations.chipDecoration(
           selected: selected,
-          backgroundColor: selected ? AppColors.primaryBlue : AppColors.grey200,
+          backgroundColor: selected 
+              ? ThemeHelper.primary(context) 
+              : ThemeHelper.surfaceVariant(context),
         ),
         child: Material(
           color: Colors.transparent,
@@ -169,14 +173,18 @@ class AnimatedFilterChip extends StatelessWidget {
                     Icon(
                       icon,
                       size: 16,
-                      color: selected ? AppColors.white : AppColors.grey700,
+                      color: selected 
+                          ? ThemeHelper.onPrimary(context) 
+                          : ThemeHelper.onSurfaceVariant(context),
                     ),
                     SizedBox(width: AppDecorations.spaceXS),
                   ],
                   Text(
                     label,
                     style: theme_styles.AppTextStyles.bodySmall.copyWith(
-                      color: selected ? AppColors.white : AppColors.grey700,
+                      color: selected 
+                          ? ThemeHelper.onPrimary(context) 
+                          : ThemeHelper.onSurfaceVariant(context),
                       fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
                     ),
                   ),
@@ -257,7 +265,7 @@ class _AnimatedBadgeState extends State<AnimatedBadge>
           child: Text(
             widget.text,
             style: theme_styles.AppTextStyles.labelSmall.copyWith(
-              color: AppColors.white,
+              color: ThemeHelper.onPrimary(context),
               fontSize: 10,
               fontWeight: FontWeight.bold,
             ),
@@ -340,16 +348,25 @@ class _AnimatedFABState extends State<AnimatedFAB>
         child: widget.isExtended && widget.label != null
             ? FloatingActionButton.extended(
                 onPressed: _handleTap,
-                icon: Icon(widget.icon),
-                label: Text(widget.label!),
+                icon: Icon(
+                  widget.icon,
+                  color: ThemeHelper.onPrimary(context),
+                ),
+                label: Text(
+                  widget.label!,
+                  style: TextStyle(color: ThemeHelper.onPrimary(context)),
+                ),
                 tooltip: widget.tooltip,
-                backgroundColor: widget.backgroundColor ?? AppColors.primaryBlue,
+                backgroundColor: widget.backgroundColor ?? ThemeHelper.primary(context),
               )
             : FloatingActionButton(
                 onPressed: _handleTap,
                 tooltip: widget.tooltip,
-                backgroundColor: widget.backgroundColor ?? AppColors.primaryBlue,
-                child: Icon(widget.icon),
+                backgroundColor: widget.backgroundColor ?? ThemeHelper.primary(context),
+                child: Icon(
+                  widget.icon,
+                  color: ThemeHelper.onPrimary(context),
+                ),
               ),
       ),
     );
@@ -371,8 +388,8 @@ class CustomPullToRefresh extends StatelessWidget {
   Widget build(BuildContext context) {
     return RefreshIndicator(
       onRefresh: onRefresh,
-      color: AppColors.primaryBlue,
-      backgroundColor: AppColors.white,
+      color: ThemeHelper.primary(context),
+      backgroundColor: ThemeHelper.surface(context),
       strokeWidth: 3,
       displacement: 40,
       child: child,
@@ -408,14 +425,16 @@ class SectionHeader extends StatelessWidget {
             Icon(
               icon,
               size: 24,
-              color: AppColors.grey700,
+              color: ThemeHelper.iconPrimary(context),
             ),
             SizedBox(width: AppDecorations.spaceSM),
           ],
           Expanded(
             child: Text(
               title,
-              style: theme_styles.AppTextStyles.h4,
+              style: theme_styles.AppTextStyles.h4.copyWith(
+                color: ThemeHelper.textPrimary(context),
+              ),
             ),
           ),
           if (actionText != null && onActionTap != null)
@@ -424,7 +443,7 @@ class SectionHeader extends StatelessWidget {
               child: Text(
                 actionText!,
                 style: theme_styles.AppTextStyles.link.copyWith(
-                  color: AppColors.primaryBlue,
+                  color: ThemeHelper.primary(context),
                 ),
               ),
             ),
@@ -465,7 +484,9 @@ class CustomBottomSheet {
                     Expanded(
                       child: Text(
                         title,
-                        style: theme_styles.AppTextStyles.h4,
+                        style: theme_styles.AppTextStyles.h4.copyWith(
+                          color: ThemeHelper.textPrimary(context),
+                        ),
                       ),
                     ),
                     IconButton(
@@ -475,7 +496,7 @@ class CustomBottomSheet {
                   ],
                 ),
               ),
-              Divider(height: 1, color: AppColors.grey300),
+              Divider(height: 1, color: ThemeHelper.divider(context)),
             ],
             Flexible(
               child: SingleChildScrollView(
@@ -505,7 +526,7 @@ class DividerWithText extends StatelessWidget {
       children: [
         Expanded(
           child: Divider(
-            color: AppColors.grey300,
+            color: ThemeHelper.divider(context),
             thickness: 1,
           ),
         ),
@@ -514,13 +535,13 @@ class DividerWithText extends StatelessWidget {
           child: Text(
             text,
             style: theme_styles.AppTextStyles.bodySmall.copyWith(
-              color: AppColors.grey600,
+              color: ThemeHelper.textSecondary(context),
             ),
           ),
         ),
         Expanded(
           child: Divider(
-            color: AppColors.grey300,
+            color: ThemeHelper.divider(context),
             thickness: 1,
           ),
         ),
@@ -546,7 +567,7 @@ class QuickActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final buttonColor = color ?? AppColors.primaryBlue;
+    final buttonColor = color ?? ThemeHelper.primary(context);
     
     return InkWell(
       onTap: onTap,
@@ -573,6 +594,7 @@ class QuickActionButton extends StatelessWidget {
             Text(
               label,
               style: theme_styles.AppTextStyles.bodySmall.copyWith(
+                color: ThemeHelper.textPrimary(context),
                 fontWeight: FontWeight.w600,
               ),
               textAlign: TextAlign.center,

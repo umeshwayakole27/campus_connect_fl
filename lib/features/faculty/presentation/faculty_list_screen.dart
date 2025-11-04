@@ -214,36 +214,46 @@ class _FacultyListScreenState extends State<FacultyListScreen> {
   }
 
   void _showFilterDialog() {
+    final theme = Theme.of(context);
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         final provider = context.read<FacultyProvider>();
         return AlertDialog(
-          title: const Text('Filter by Department'),
+          title: Text(
+            'Filter by Department',
+            style: TextStyle(color: theme.colorScheme.onSurface),
+          ),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 ListTile(
-                  title: const Text('All Departments'),
+                  title: Text(
+                    'All Departments',
+                    style: TextStyle(color: theme.colorScheme.onSurface),
+                  ),
                   leading: Radio<String?>(
                     value: null,
                     groupValue: provider.selectedDepartment,
                     onChanged: (value) {
                       provider.setDepartmentFilter(value);
-                      Navigator.pop(context);
+                      Navigator.pop(dialogContext);
                     },
                   ),
                 ),
                 ...provider.departments.map((dept) {
                   return ListTile(
-                    title: Text(dept),
+                    title: Text(
+                      dept,
+                      style: TextStyle(color: theme.colorScheme.onSurface),
+                    ),
                     leading: Radio<String?>(
                       value: dept,
                       groupValue: provider.selectedDepartment,
                       onChanged: (value) {
                         provider.setDepartmentFilter(value);
-                        Navigator.pop(context);
+                        Navigator.pop(dialogContext);
                       },
                     ),
                   );
@@ -253,7 +263,7 @@ class _FacultyListScreenState extends State<FacultyListScreen> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(dialogContext),
               child: const Text('Close'),
             ),
           ],

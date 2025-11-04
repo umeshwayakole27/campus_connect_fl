@@ -1,254 +1,173 @@
-# Campus Connect
+# Campus Connect 🎓
 
-A comprehensive Flutter-based mobile application for campus navigation, event discovery, and faculty information management. Built with Flutter, Supabase (PostgreSQL), Google Maps API, and Firebase Cloud Messaging.
+A comprehensive Flutter-based mobile application for campus navigation, event discovery, and faculty information management.
 
-## 🚀 Features
+![Flutter](https://img.shields.io/badge/Flutter-3.19+-02569B?logo=flutter)
+![Dart](https://img.shields.io/badge/Dart-3.3+-0175C2?logo=dart)
+![Supabase](https://img.shields.io/badge/Supabase-Backend-3ECF8E?logo=supabase)
+![Firebase](https://img.shields.io/badge/Firebase-FCM-FFCA28?logo=firebase)
+
+## 📱 Overview
+
+Campus Connect enhances campus life by providing interactive navigation, event management, faculty directory, real-time notifications, and more.
+
+## ✨ Key Features
 
 ### For Students
-- 🗺️ **Interactive Campus Map** - Navigate campus with Google Maps integration
-- 📅 **Event Discovery** - Browse and search campus events
-- 👥 **Faculty Directory** - Find faculty members with office locations and hours
-- 🔔 **Push Notifications** - Receive updates about campus events and announcements
-- 🔍 **Global Search** - Search across events, faculty, and locations
+- 🗺️ Navigate campus with Google Maps and turn-by-turn directions
+- 📅 Discover and register for campus events
+- 👥 Find faculty with office hours and locations
+- 🔔 Receive real-time push notifications
+- 🔍 Search across events, faculty, and locations
+- 🌓 Beautiful Material 3 UI with light/dark mode
 
 ### For Faculty
-- ➕ **Event Management** - Create, edit, and delete campus events
-- 📢 **Notifications** - Send announcements to students
-- 📍 **Location Management** - Manage campus locations and buildings
-- 👤 **Profile Management** - Update office hours and contact information
+- ➕ Create and manage campus events
+- 📢 Send announcements to students
+- 📍 Update office hours and contact info
+- 👤 Manage faculty profile
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Flutter SDK 3.19+
+- Dart SDK 3.3+
+- Supabase account
+- Firebase account
+- Google Maps API key
+
+### Installation
+
+1. **Clone repository**
+   ```bash
+   git clone https://github.com/yourusername/campus_connect_fl.git
+   cd campus_connect_fl
+   ```
+
+2. **Install dependencies**
+   ```bash
+   flutter pub get
+   ```
+
+3. **Configure environment**
+   
+   Create `.env` file:
+   ```env
+   SUPABASE_URL=your_supabase_url
+   SUPABASE_ANON_KEY=your_supabase_anon_key
+   GOOGLE_MAPS_API_KEY=your_google_maps_api_key
+   ```
+
+4. **Run the app**
+   ```bash
+   flutter run
+   ```
+
+### Detailed Setup
+
+📖 **See [SETUP.md](SETUP.md)** for complete step-by-step setup including:
+- Supabase database configuration
+- Firebase FCM setup
+- Google Maps API configuration
+- Platform-specific setup (Android/iOS)
+
+## 📚 Documentation
+
+- **[SETUP.md](SETUP.md)** - Complete setup guide
+- **[features.md](features.md)** - Feature list and user flows
 
 ## 🏗️ Architecture
 
-This project follows **Clean Architecture** principles with feature-based organization:
+Built with **Clean Architecture** principles:
 
 ```
 lib/
-├── core/                    # Core utilities and shared code
-│   ├── constants.dart      # App constants and routes
-│   ├── theme.dart          # Material 3 theme
-│   ├── utils.dart          # Utility functions
-│   ├── models/             # Data models
-│   ├── services/           # Core services
-│   └── widgets/            # Shared widgets
-├── features/               # Feature modules
-│   ├── auth/              # Authentication
-│   ├── campus_map/        # Map functionality
-│   ├── events/            # Event management
-│   ├── faculty/           # Faculty directory
-│   ├── notifications/     # Push notifications
-│   └── search/            # Global search
-└── routes/                # Navigation configuration
+├── core/              # Shared utilities, models, services
+├── features/          # Feature modules (auth, events, map, etc.)
+│   ├── data/         # Data layer
+│   └── presentation/ # UI layer
+└── main.dart         # Entry point
 ```
 
-## 📋 Prerequisites
+**Tech Stack:**
+- **Frontend**: Flutter + Provider (state management)
+- **Backend**: Supabase (PostgreSQL + Real-time)
+- **Notifications**: Firebase Cloud Messaging
+- **Maps**: Google Maps API
+- **UI**: Material Design 3 with custom theming
 
-- Flutter SDK (^3.9.2)
-- Dart SDK
-- Supabase account
-- Google Maps API key
-- Firebase project (for push notifications)
+## 🎨 Design System
 
-## 🛠️ Setup Instructions
+- **Material 3** expressive design language
+- Dynamic light/dark theme support
+- Context-aware colors using ThemeHelper
+- Smooth 60 FPS animations
+- Responsive layouts for all screen sizes
 
-### 1. Clone and Install Dependencies
+## 🔐 Security
+
+- Row Level Security (RLS) at database level
+- Role-based permissions (student/faculty)
+- Encrypted credential storage
+- Environment variable protection
+- Input validation (client + server)
+
+## 📱 Platform Support
+
+- ✅ Android (API 21+)
+- ✅ iOS (11.0+)
+- ✅ Web
+- ✅ Linux/macOS/Windows (Desktop)
+
+## 🧪 Testing & Building
 
 ```bash
-# Clone the repository
-git clone <your-repo-url>
-cd campus_connect_fl
-
-# Install Flutter dependencies
-flutter pub get
-```
-
-### 2. Configure Environment Variables
-
-Create a `.env` file in the root directory:
-
-```env
-SUPABASE_URL=your_supabase_project_url
-SUPABASE_ANON_KEY=your_supabase_anon_key
-GOOGLE_MAPS_API_KEY=your_google_maps_api_key
-```
-
-### 3. Set Up Supabase Backend
-
-Create a Supabase project and set up:
-- Database schema (users, events, faculty, campus_locations, notifications tables)
-- Row Level Security (RLS) policies
-- Enable email/password authentication
-- Configure storage buckets for images
-
-### 4. Configure Google Maps
-
-#### Android
-Add your API key to `android/app/src/main/AndroidManifest.xml`:
-
-```xml
-<meta-data
-    android:name="com.google.android.geo.API_KEY"
-    android:value="YOUR_GOOGLE_MAPS_API_KEY"/>
-```
-
-#### iOS
-Add your API key to `ios/Runner/AppDelegate.swift`:
-
-```swift
-GMSServices.provideAPIKey("YOUR_GOOGLE_MAPS_API_KEY")
-```
-
-### 5. Configure Firebase (Optional - for Push Notifications)
-
-```bash
-# Install FlutterFire CLI
-dart pub global activate flutterfire_cli
-
-# Configure Firebase
-flutterfire configure
-```
-
-### 6. Generate Code (for JSON serialization)
-
-```bash
-flutter pub run build_runner build --delete-conflicting-outputs
-```
-
-## 🚦 Running the App
-
-```bash
-# Run on connected device/emulator
-flutter run
-
-# Run in release mode
-flutter run --release
-
-# Run on specific device
-flutter run -d <device_id>
-```
-
-## 📦 Dependencies
-
-### Core Dependencies
-- `supabase_flutter` - Backend and authentication
-- `google_maps_flutter` - Maps integration
-- `firebase_messaging` - Push notifications
-- `provider` - State management
-- `flutter_secure_storage` - Secure data storage
-- `go_router` - Navigation
-- `cached_network_image` - Image caching
-
-### Development Dependencies
-- `flutter_lints` - Code quality
-- `build_runner` - Code generation
-- `json_serializable` - JSON serialization
-- `mockito` - Testing
-
-See [pubspec.yaml](pubspec.yaml) for complete list.
-
-## 🔐 Security Features
-
-- **Row Level Security (RLS)** - Database-level security policies
-- **Role-Based Access Control** - Faculty vs Student permissions
-- **Secure Token Storage** - Encrypted credential storage
-- **Environment Variables** - API keys and secrets protected
-- **Input Validation** - Client and server-side validation
-
-## 🧪 Testing
-
-```bash
-# Run all tests
+# Run tests
 flutter test
 
-# Run with coverage
-flutter test --coverage
+# Analyze code
+flutter analyze
 
-# Run specific test file
-flutter test test/core/services/auth_service_test.dart
+# Build Android APK
+flutter build apk --release
+
+# Build iOS
+flutter build ios --release
 ```
 
-## 📱 Supported Platforms
+## 🗺️ Roadmap
 
-- ✅ Android
-- ✅ iOS
-- ✅ Web
-- ✅ Linux
-- ✅ macOS
-- ✅ Windows
+- [ ] Real-time event updates via WebSocket
+- [ ] QR code attendance tracking
+- [ ] Chat functionality
+- [ ] Resource booking system
+- [ ] Multi-language support
+- [ ] Analytics dashboard
 
-## ✅ Development Status
+## 📊 Project Status
 
-**Overall Progress: 98% Complete** - Ready for production deployment!
+**Overall Completion: 98%** 🎉
 
-All core features completed:
 - ✅ Authentication & User Management
 - ✅ Campus Map & Navigation
 - ✅ Event Management
 - ✅ Faculty Directory
 - ✅ Global Search
 - ✅ Push Notifications
-- ✅ UI/UX Design & Polish
-
-See [features.md](features.md) for detailed feature list and descriptions.
-
-## 📚 Documentation
-
- - [features.md](features.md) - Complete feature list and descriptions 
-- [pubspec.yaml](pubspec.yaml) - Dependencies and project configuration
-
-## 🔄 Database Schema
-
-### Main Tables
-- `users` - User profiles with role-based access (student/faculty)
-- `events` - Campus events with categories and RSVP tracking
-- `faculty` - Faculty information with departments and office hours
-- `campus_locations` - Campus buildings and facilities with coordinates
-- `notifications` - Push notifications and announcements
-
-## 🎨 Design System
-
-- **UI Framework**: Material Design 3
-- **Theme**: Light and Dark mode support
-- **Colors**: Primary (Blue), Secondary (Green), Accent (Orange)
-- **Typography**: Material Typography Scale
+- ✅ Material 3 UI with theming
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+Contributions welcome! Please submit Pull Requests.
 
-## 📄 License
+## 📝 License
 
-This project is licensed under the MIT License.
-
-## 👥 Authors
-
-- [umeshwayakole27](https://github.com/umeshwayakole27)- Initial work
-
-## 🙏 Acknowledgments
-
-- Flutter team for the amazing framework
-- Supabase for the backend platform
-- Google Maps for navigation services
-- Firebase for push notifications
+MIT License - see [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-For issues and questions:
-- Open an issue on GitHub
-- Check [features.md](features.md) for feature documentation
-
-## 🔮 Upcoming Features
-
-See [features.md](features.md) for complete list of upcoming features including:
-- Real-time event updates
-- Chat functionality
-- Resource booking system
-- Analytics dashboard
-- Multi-language support
+For support or questions, create an issue on GitHub.
 
 ---
 
-**Note**: Before running the app, ensure you've set up your Supabase project with the required database schema and configured your `.env` file with valid credentials.
+**Built with ❤️ using Flutter**

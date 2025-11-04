@@ -163,12 +163,22 @@ class EventDetailScreen extends StatelessWidget {
                           Icons.location_on,
                           color: theme.colorScheme.primary,
                         ),
-                        title: Text(event.location!),
+                        title: Text(
+                          event.location!,
+                          style: TextStyle(color: theme.colorScheme.onSurface),
+                        ),
                         subtitle: event.locationId != null
-                            ? const Text('Tap to view on map')
+                            ? Text(
+                                'Tap to view on map',
+                                style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+                              )
                             : null,
                         trailing: event.locationId != null
-                            ? const Icon(Icons.arrow_forward_ios, size: 16)
+                            ? Icon(
+                                Icons.arrow_forward_ios, 
+                                size: 16,
+                                color: theme.colorScheme.onSurfaceVariant,
+                              )
                             : null,
                         onTap: event.locationId != null
                             ? () {
@@ -197,8 +207,14 @@ class EventDetailScreen extends StatelessWidget {
                           color: theme.colorScheme.onPrimaryContainer,
                         ),
                       ),
-                      title: Text(event.createdBy ?? 'Unknown'),
-                      subtitle: const Text('Faculty'),
+                      title: Text(
+                        event.createdBy ?? 'Unknown',
+                        style: TextStyle(color: theme.colorScheme.onSurface),
+                      ),
+                      subtitle: Text(
+                        'Faculty',
+                        style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+                      ),
                     ),
                   ),
                 ],
@@ -215,6 +231,7 @@ class EventDetailScreen extends StatelessWidget {
       title,
       style: Theme.of(context).textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
     );
   }

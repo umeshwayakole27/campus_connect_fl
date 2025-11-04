@@ -105,21 +105,22 @@ class _SearchScreenState extends State<SearchScreen> {
                 child: Row(
                   children: SearchCategory.values.map((category) {
                     final isSelected = searchProvider.category == category;
+                    final theme = Theme.of(context);
                     return Padding(
                       padding: const EdgeInsets.only(right: 8.0),
                       child: FilterChip(
-                        label: Text(_getCategoryLabel(category)),
+                        label: Text(
+                          _getCategoryLabel(category),
+                          style: TextStyle(
+                            color: isSelected 
+                                ? theme.colorScheme.onSecondaryContainer 
+                                : theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
                         selected: isSelected,
                         onSelected: (selected) {
                           searchProvider.setCategory(category);
                         },
-                        labelStyle: TextStyle(
-                          color: isSelected 
-                            ? Theme.of(context).colorScheme.onPrimary 
-                            : Theme.of(context).colorScheme.onSurface,
-                        ),
-                        backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
-                        selectedColor: Theme.of(context).colorScheme.primary,
                       ),
                     );
                   }).toList(),
@@ -202,7 +203,10 @@ class _SearchScreenState extends State<SearchScreen> {
           const SizedBox(height: 8),
           ...searchProvider.searchHistory.take(5).map((query) => ListTile(
                 leading: const Icon(Icons.history),
-                title: Text(query),
+                title: Text(
+                  query,
+                  style: TextStyle(color: theme.colorScheme.onSurface),
+                ),
                 trailing: const Icon(Icons.arrow_forward),
                 onTap: () {
                   _searchController.text = query;
@@ -210,32 +214,6 @@ class _SearchScreenState extends State<SearchScreen> {
                 },
               )),
           const Divider(),
-        ],
-
-        // Popular searches
-        if (searchProvider.popularSearches.isNotEmpty) ...[
-          const SizedBox(height: 16),
-          Text(
-            'Popular Searches',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            children: searchProvider.popularSearches.map((query) => ActionChip(
-                  label: Text(query),
-                  onPressed: () {
-                    _searchController.text = query;
-                    searchProvider.search(query);
-                  },
-                  labelStyle: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                  backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
-                )).toList(),
-          ),
         ],
 
         // Search tips
@@ -247,10 +225,22 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
         ),
         const SizedBox(height: 8),
-        const Text('• Search by event name, date, or location'),
-        const Text('• Find faculty by name or department'),
-        const Text('• Locate campus buildings and facilities'),
-        const Text('• Use filters to narrow down results'),
+        Text(
+          '• Search by event name, date, or location',
+          style: TextStyle(color: theme.colorScheme.onSurface),
+        ),
+        Text(
+          '• Find faculty by name or department',
+          style: TextStyle(color: theme.colorScheme.onSurface),
+        ),
+        Text(
+          '• Locate campus buildings and facilities',
+          style: TextStyle(color: theme.colorScheme.onSurface),
+        ),
+        Text(
+          '• Use filters to narrow down results',
+          style: TextStyle(color: theme.colorScheme.onSurface),
+        ),
       ],
     );
   }

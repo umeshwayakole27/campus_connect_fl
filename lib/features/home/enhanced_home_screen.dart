@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:provider/provider.dart';
 import '../../core/providers/auth_provider.dart';
-import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart' as theme_styles;
 import '../../core/theme/app_decorations.dart';
+import '../../core/theme/theme_helper.dart';
 import '../../core/widgets/enhanced_cards.dart';
 import '../../core/widgets/custom_widgets.dart';
 import '../events/presentation/event_provider.dart';
@@ -284,7 +284,7 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen>
                 title: 'Campus Locations',
                 value: '10+',
                 icon: Icons.location_on,
-                color: AppColors.accentRed,
+                color: ThemeHelper.error(context),
                 onTap: () {
                   widget.onNavigateToTab?.call(1); // Navigate to Campus Map tab
                 },
@@ -305,12 +305,12 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen>
           Container(
             padding: EdgeInsets.all(AppDecorations.spaceMD),
             decoration: BoxDecoration(
-              color: AppColors.primaryBlue.withValues(alpha: 0.1),
+              color: ThemeHelper.containerPrimary(context),
               borderRadius: BorderRadius.circular(AppDecorations.radiusMD),
             ),
             child: Icon(
               Icons.flash_on,
-              color: AppColors.primaryBlue,
+              color: ThemeHelper.primary(context),
               size: 24,
             ),
           ),
@@ -339,11 +339,13 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen>
           padding: EdgeInsets.symmetric(horizontal: AppDecorations.spaceMD),
           child: Row(
             children: [
-              Icon(Icons.event_note, color: AppColors.grey700),
+              Icon(Icons.event_note, color: ThemeHelper.iconPrimary(context)),
               SizedBox(width: AppDecorations.spaceSM),
               Text(
                 'Upcoming Events',
-                style: theme_styles.AppTextStyles.h4,
+                style: theme_styles.AppTextStyles.h4.copyWith(
+                  color: ThemeHelper.textPrimary(context),
+                ),
               ),
             ],
           ),
@@ -396,13 +398,13 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen>
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              AppColors.secondaryGreen.withValues(alpha: 0.1),
-              AppColors.secondaryLight.withValues(alpha: 0.1),
+              ThemeHelper.containerSecondary(context),
+              ThemeHelper.containerSecondary(context),
             ],
           ),
           borderRadius: BorderRadius.circular(AppDecorations.radiusLG),
           border: Border.all(
-            color: AppColors.secondaryGreen.withValues(alpha: 0.3),
+            color: ThemeHelper.secondary(context).withOpacity(0.3),
             width: 1,
           ),
         ),
@@ -414,12 +416,12 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen>
                 Container(
                   padding: EdgeInsets.all(AppDecorations.spaceSM),
                   decoration: BoxDecoration(
-                    color: AppColors.secondaryGreen.withValues(alpha: 0.2),
+                    color: ThemeHelper.secondary(context).withOpacity(0.2),
                     borderRadius: BorderRadius.circular(AppDecorations.radiusSM),
                   ),
                   child: Icon(
                     Icons.admin_panel_settings,
-                    color: AppColors.secondaryGreen,
+                    color: ThemeHelper.secondary(context),
                     size: 32,
                   ),
                 ),
@@ -431,14 +433,14 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen>
                       Text(
                         'Faculty Dashboard',
                         style: theme_styles.AppTextStyles.h4.copyWith(
-                          color: AppColors.secondaryDark,
+                          color: ThemeHelper.secondary(context),
                         ),
                       ),
                       SizedBox(height: AppDecorations.spaceXS),
                       Text(
                         'Manage events and announcements',
                         style: theme_styles.AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.grey600,
+                          color: ThemeHelper.textSecondary(context),
                         ),
                       ),
                     ],
@@ -497,7 +499,7 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen>
           children: [
             Icon(
               icon,
-              color: AppColors.secondaryGreen,
+              color: ThemeHelper.secondary(context),
               size: 24,
             ),
             SizedBox(width: AppDecorations.spaceMD),
@@ -514,7 +516,7 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen>
                   Text(
                     description,
                     style: theme_styles.AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.grey600,
+                      color: ThemeHelper.textSecondary(context),
                     ),
                   ),
                 ],
@@ -522,7 +524,7 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen>
             ),
             Icon(
               Icons.chevron_right,
-              color: AppColors.grey400,
+              color: ThemeHelper.iconSecondary(context),
             ),
           ],
         ),

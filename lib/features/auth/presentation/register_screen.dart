@@ -181,7 +181,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   children: [
                     Expanded(
                       child: RadioListTile<String>(
-                        title: const Text('Student'),
+                        title: Text(
+                          'Student',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
                         value: AppConstants.roleStudent,
                         groupValue: _selectedRole,
                         onChanged: (value) {
@@ -193,7 +198,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     Expanded(
                       child: RadioListTile<String>(
-                        title: const Text('Faculty'),
+                        title: Text(
+                          'Faculty',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
                         value: AppConstants.roleFaculty,
                         groupValue: _selectedRole,
                         onChanged: (value) {

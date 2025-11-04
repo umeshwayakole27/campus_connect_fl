@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import '../theme/app_decorations.dart';
 import '../theme/app_animations.dart';
+import '../theme/theme_helper.dart';
 
 /// Primary button with gradient background
 class PrimaryButton extends StatefulWidget {
@@ -83,11 +83,11 @@ class _PrimaryButtonState extends State<PrimaryButton>
           decoration: AppDecorations.primaryButtonDecoration(enabled: isEnabled),
           child: Center(
             child: widget.isLoading
-                ? const SizedBox(
+                ? SizedBox(
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(
-                      color: AppColors.white,
+                      color: ThemeHelper.onPrimary(context),
                       strokeWidth: 2,
                     ),
                   )
@@ -98,7 +98,7 @@ class _PrimaryButtonState extends State<PrimaryButton>
                       if (widget.icon != null) ...[
                         Icon(
                           widget.icon,
-                          color: AppColors.white,
+                          color: ThemeHelper.onPrimary(context),
                           size: 20,
                         ),
                         const SizedBox(width: AppDecorations.spaceSM),
@@ -106,7 +106,7 @@ class _PrimaryButtonState extends State<PrimaryButton>
                       Text(
                         widget.text,
                         style: AppTextStyles.button.copyWith(
-                          color: AppColors.white,
+                          color: ThemeHelper.onPrimary(context),
                         ),
                       ),
                     ],
@@ -197,11 +197,11 @@ class _SecondaryButtonState extends State<SecondaryButton>
           decoration: AppDecorations.secondaryButtonDecoration(enabled: isEnabled),
           child: Center(
             child: widget.isLoading
-                ? const SizedBox(
+                ? SizedBox(
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(
-                      color: AppColors.primaryBlue,
+                      color: ThemeHelper.primary(context),
                       strokeWidth: 2,
                     ),
                   )
@@ -213,8 +213,8 @@ class _SecondaryButtonState extends State<SecondaryButton>
                         Icon(
                           widget.icon,
                           color: isEnabled
-                              ? AppColors.primaryBlue
-                              : AppColors.grey400,
+                              ? ThemeHelper.primary(context)
+                              : ThemeHelper.iconDisabled(context),
                           size: 20,
                         ),
                         const SizedBox(width: AppDecorations.spaceSM),
@@ -223,8 +223,8 @@ class _SecondaryButtonState extends State<SecondaryButton>
                         widget.text,
                         style: AppTextStyles.button.copyWith(
                           color: isEnabled
-                              ? AppColors.primaryBlue
-                              : AppColors.grey400,
+                              ? ThemeHelper.primary(context)
+                              : ThemeHelper.iconDisabled(context),
                         ),
                       ),
                     ],
@@ -307,12 +307,12 @@ class _CustomIconButtonState extends State<CustomIconButton>
             width: widget.size,
             height: widget.size,
             decoration: BoxDecoration(
-              color: widget.backgroundColor ?? AppColors.grey100,
+              color: widget.backgroundColor ?? ThemeHelper.surfaceVariant(context),
               shape: BoxShape.circle,
             ),
             child: Icon(
               widget.icon,
-              color: widget.iconColor ?? AppColors.grey700,
+              color: widget.iconColor ?? ThemeHelper.iconPrimary(context),
               size: widget.size * 0.5,
             ),
           ),
