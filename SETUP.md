@@ -309,7 +309,7 @@ INSERT INTO public.campus_locations (name, building_code, latitude, longitude, d
 ('Parking Area', 'PARK', 18.5250, 73.8610, 'Vehicle parking');
 ```
 
-### Step 4: Create Database Functions (Optional - for advanced features)
+### Step 4: Create Database Functions
 
 ```sql
 -- Function to automatically update updated_at timestamp
@@ -330,6 +330,35 @@ CREATE TRIGGER update_faculty_updated_at BEFORE UPDATE ON public.faculty
 
 CREATE TRIGGER update_events_updated_at BEFORE UPDATE ON public.events
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Function to broadcast notifications to all users (bypasses RLS)
+CREATE OR REPLACE FUNCTION broadcast_notification_to_all_users(
+  p_type TEXT,
+  p_title TEXT,
+  p_message TEXT,
+  p_event_id UUID DEFAULT NULL
+)
+RETURNS SETOF notifications
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  RETURN QUERY
+  INSERT INTO notifications (user_id, type, title, message, event_id, read)
+  SELECT 
+    id,
+    p_type,
+    p_title,
+    p_message,
+    p_event_id,
+    false
+  FROM users
+  RETURNING *;
+END;
+$$;
+
+-- Grant execute permission to authenticated users
+GRANT EXECUTE ON FUNCTION broadcast_notification_to_all_users(TEXT, TEXT, TEXT, UUID) TO authenticated;
 ```
 
 ---

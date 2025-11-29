@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../../../core/models/event_model.dart';
+import '../../campus_map/data/location_repository.dart';
+import '../../campus_map/presentation/campus_map_screen.dart';
 import 'event_provider.dart';
 import 'create_edit_event_screen.dart';
 
@@ -181,14 +184,7 @@ class EventDetailScreen extends StatelessWidget {
                               )
                             : null,
                         onTap: event.locationId != null
-                            ? () {
-                                // TODO: Navigate to map with this location selected
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Opening map...'),
-                                  ),
-                                );
-                              }
+                            ? () => _navigateToMap(context, event.locationId!, event.location!)
                             : null,
                       ),
                     ),
@@ -234,6 +230,39 @@ class EventDetailScreen extends StatelessWidget {
             color: Theme.of(context).colorScheme.onSurface,
           ),
     );
+  }
+
+  Future<void> _navigateToMap(BuildContext context, String locationId, String locationName) async {
+    try {
+      final locationRepository = LocationRepository();
+      final location = await locationRepository.getLocationById(locationId);
+      
+      if (location != null && context.mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CampusMapScreen(
+              targetLocation: LatLng(location.lat, location.lng),
+              targetLocationName: locationName,
+            ),
+          ),
+        );
+      } else if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Location not found'),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load location: $e'),
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _showDeleteDialog(

@@ -139,37 +139,35 @@ class NotificationRepository {
         debugPrint('⚠️  Supabase response error: ${response.status}');
       }
       
-      // Step 2: Save to database for notification history
+      // Step 2: Save to database for notification history using RPC function
       debugPrint('📢 Saving notification history to database...');
       
-      final usersResponse = await _supabase
-          .from('users')
-          .select('id');
-
-      final userIds = (usersResponse as List)
-          .map((user) => user['id'] as String)
-          .toList();
-
-      debugPrint('📢 Creating history for ${userIds.length} users...');
-
-      if (userIds.isNotEmpty) {
-        final notifications = userIds.map((userId) => {
-              'user_id': userId,
-              'event_id': eventId,
-              'type': type,
-              'title': title,
-              'message': message,
-            }).toList();
-
-        await _supabase
-            .from('notifications')
-            .insert(notifications);
-            
+      try {
+        // Use the database function that bypasses RLS
+        debugPrint('📢 Calling broadcast_notification_to_all_users RPC...');
+        
+        final result = await _supabase.rpc(
+          'broadcast_notification_to_all_users',
+          params: {
+            'p_type': type,
+            'p_title': title,
+            'p_message': message,
+            'p_event_id': eventId,
+          },
+        );
+        
+        final notifications = result as List;
         debugPrint('📢 ✅ Broadcast complete!');
         debugPrint('📢 Push sent via FCM to all devices');
-        debugPrint('📢 History saved for ${userIds.length} users');
-      } else {
-        debugPrint('⚠️  No users found for history');
+        debugPrint('📢 History saved for ${notifications.length} users');
+        
+        if (notifications.isNotEmpty) {
+          debugPrint('📢 Sample created notification: ${notifications.first}');
+        }
+      } catch (e) {
+        debugPrint('❌ Error calling RPC function: $e');
+        debugPrint('⚠️  Make sure to run the migration: supabase/migrations/20251104_broadcast_notifications.sql');
+        throw Exception('Failed to broadcast notification history: $e');
       }
     } catch (e, stackTrace) {
       debugPrint('❌ Error broadcasting notification: $e');
@@ -194,6 +192,8 @@ class NotificationRepository {
 
   // Listen to real-time notifications
   RealtimeChannel subscribeToNotifications(String userId, Function(AppNotification) onNotification) {
+    debugPrint('🔔 Setting up realtime channel for user: $userId');
+    
     final channel = _supabase
         .channel('notifications:$userId')
         .onPostgresChanges(
@@ -206,12 +206,19 @@ class NotificationRepository {
             value: userId,
           ),
           callback: (payload) {
-            final notification = AppNotification.fromJson(payload.newRecord);
-            onNotification(notification);
+            debugPrint('🔔 Realtime event received! Payload: ${payload.newRecord}');
+            try {
+              final notification = AppNotification.fromJson(payload.newRecord);
+              debugPrint('🔔 Parsed notification: ${notification.title}');
+              onNotification(notification);
+            } catch (e) {
+              debugPrint('🔔 Error parsing notification: $e');
+            }
           },
         )
         .subscribe();
 
+    debugPrint('🔔 Realtime channel subscribed successfully');
     return channel;
   }
 

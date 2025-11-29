@@ -79,25 +79,10 @@ class _CampusMapScreenState extends State<CampusMapScreen> with AutomaticKeepAli
   
   Future<void> _handleTargetLocation() async {
     if (widget.targetLocation != null) {
-      // Wait for controller to be ready
-      await Future.delayed(const Duration(milliseconds: 500));
+      // Wait for controller and locations to be ready
+      await Future.delayed(const Duration(milliseconds: 800));
       
       if (_mapController != null && mounted) {
-        // Add marker for target location
-        setState(() {
-          _markers.add(
-            Marker(
-              markerId: const MarkerId('target_location'),
-              position: widget.targetLocation!,
-              icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
-              infoWindow: InfoWindow(
-                title: widget.targetLocationName ?? 'Target Location',
-                snippet: 'Faculty Office',
-              ),
-            ),
-          );
-        });
-        
         // Animate camera to target location
         await _mapController!.animateCamera(
           CameraUpdate.newLatLngZoom(widget.targetLocation!, 18),
@@ -381,6 +366,21 @@ class _CampusMapScreenState extends State<CampusMapScreen> with AutomaticKeepAli
         : _locations.where((loc) => loc.category == _selectedCategory).toList();
 
     final newMarkers = <Marker>{};
+    
+    // Add target location marker if available (from navigation)
+    if (widget.targetLocation != null) {
+      newMarkers.add(
+        Marker(
+          markerId: const MarkerId('target_location'),
+          position: widget.targetLocation!,
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
+          infoWindow: InfoWindow(
+            title: widget.targetLocationName ?? 'Target Location',
+            snippet: 'Tap for details',
+          ),
+        ),
+      );
+    }
     
     // Add user's current location marker if available
     if (_currentUserLocation != null) {

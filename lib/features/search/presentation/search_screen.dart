@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../core/providers/auth_provider.dart';
 import 'search_provider.dart';
 import '../../events/presentation/event_detail_screen.dart';
 import '../../faculty/presentation/faculty_detail_screen.dart';
+import '../../campus_map/presentation/campus_map_screen.dart';
 import '../../../core/widgets/loading_widget.dart';
 import '../../../core/widgets/empty_state_widget.dart';
 
@@ -344,15 +346,12 @@ class _SearchScreenState extends State<SearchScreen> {
                   ),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                   onTap: () {
-                    // Navigate to map with location selected
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Navigate to ${location.name} on map'),
-                        action: SnackBarAction(
-                          label: 'Go',
-                          onPressed: () {
-                            // TODO: Navigate to map screen with this location
-                          },
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CampusMapScreen(
+                          targetLocation: LatLng(location.lat, location.lng),
+                          targetLocationName: location.name,
                         ),
                       ),
                     );

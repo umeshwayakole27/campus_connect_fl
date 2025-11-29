@@ -79,19 +79,27 @@ class NotificationProvider extends ChangeNotifier {
       _repository.unsubscribeFromNotifications(_realtimeSubscription!);
     }
 
+    debugPrint('📱 Subscribing to realtime notifications for user: $userId');
+    
     // Subscribe to new notifications
     _realtimeSubscription = _repository.subscribeToNotifications(
       userId,
       (notification) {
+        debugPrint('📱 ✅ New notification received via realtime!');
+        debugPrint('📱 Title: ${notification.title}');
+        debugPrint('📱 Message: ${notification.message}');
+        
         // Add new notification to the list
         _notifications.insert(0, notification);
         _unreadCount++;
         notifyListeners();
 
         // Show a snackbar or local notification
-        debugPrint('New notification received: ${notification.title}');
+        debugPrint('📱 Notification added to list. Total: ${_notifications.length}');
       },
     );
+    
+    debugPrint('📱 Realtime subscription created successfully');
   }
 
   // Mark notification as read

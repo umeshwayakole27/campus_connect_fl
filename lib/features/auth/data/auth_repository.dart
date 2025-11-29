@@ -65,14 +65,14 @@ class AuthRepository {
         if (role == 'faculty') {
           final facultyData = {
             'user_id': authResponse.user!.id,
-            'name': name,
             'department': department ?? '',
-            'office': office,
+            'designation': null,
+            'office_location': office,
             'office_hours': officeHours,
-            'contact_email': email,
+            'phone': null,
           };
           
-          await _client.from('faculty').insert(facultyData);
+          await _client.from('faculty').insert(facultyData).select();
         }
 
         // Return null to indicate email confirmation needed
@@ -97,14 +97,14 @@ class AuthRepository {
       if (role == 'faculty') {
         final facultyData = {
           'user_id': authResponse.user!.id,
-          'name': name,
           'department': department ?? '',
-          'office': office,
+          'designation': null,
+          'office_location': office,
           'office_hours': officeHours,
-          'contact_email': email,
+          'phone': null,
         };
         
-        await _client.from('faculty').insert(facultyData);
+        await _client.from('faculty').insert(facultyData).select();
       }
 
       // Fetch and return complete user profile

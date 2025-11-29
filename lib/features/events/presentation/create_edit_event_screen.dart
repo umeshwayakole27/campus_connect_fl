@@ -168,12 +168,16 @@ class _CreateEditEventScreenState extends State<CreateEditEventScreen> {
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.location_on),
                 ),
+                isExpanded: true,
                 initialValue: _selectedLocation,
                 hint: const Text('Select campus location'),
                 items: _campusLocations.map((location) {
                   return DropdownMenuItem(
                     value: location,
-                    child: Text(location.name),
+                    child: Text(
+                      location.name,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   );
                 }).toList(),
                 onChanged: (location) {
