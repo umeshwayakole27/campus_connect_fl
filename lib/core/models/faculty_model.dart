@@ -29,7 +29,7 @@ class Faculty extends Equatable {
   // Getters for user data
   String? get userName => user?['name'] as String?;
   String? get userEmail => user?['email'] as String?;
-  String? get userAvatarUrl => user?['avatar_url'] as String?;
+  String? get userAvatarUrl => user?['profile_pic'] as String?;
 
   const Faculty({
     required this.id,

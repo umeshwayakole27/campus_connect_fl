@@ -24,7 +24,7 @@ class FacultyRepository {
           .from('faculty')
           .select('''
             *,
-            user:users!faculty_user_id_fkey(id, name, email)
+            user:users!faculty_user_id_fkey(id, name, email, profile_pic)
           ''')
           .order('user(name)', ascending: true);
 
@@ -51,7 +51,7 @@ class FacultyRepository {
           .from('faculty')
           .select('''
             *,
-            user:users!faculty_user_id_fkey(id, name, email)
+            user:users!faculty_user_id_fkey(id, name, email, profile_pic)
           ''')
           .eq('id', id)
           .single();
@@ -70,7 +70,7 @@ class FacultyRepository {
           .from('faculty')
           .select('''
             *,
-            user:users!faculty_user_id_fkey(id, name, email)
+            user:users!faculty_user_id_fkey(id, name, email, profile_pic)
           ''')
           .eq('user_id', userId)
           .single();
@@ -89,7 +89,7 @@ class FacultyRepository {
           .from('faculty')
           .select('''
             *,
-            user:users!faculty_user_id_fkey(id, name, email)
+            user:users!faculty_user_id_fkey(id, name, email, profile_pic)
           ''')
           .eq('department', department)
           .order('user(name)', ascending: true);
@@ -110,7 +110,7 @@ class FacultyRepository {
           .from('faculty')
           .select('''
             *,
-            user:users!faculty_user_id_fkey(id, name, email)
+            user:users!faculty_user_id_fkey(id, name, email, profile_pic)
           ''')
           .ilike('user.name', '%$query%')
           .order('user(name)', ascending: true);
@@ -162,7 +162,7 @@ class FacultyRepository {
           .eq('id', id)
           .select('''
             *,
-            user:users!faculty_user_id_fkey(id, name, email)
+            user:users!faculty_user_id_fkey(id, name, email, profile_pic)
           ''')
           .single();
 
