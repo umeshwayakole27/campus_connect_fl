@@ -1,106 +1,244 @@
-# Campus Connect - UML Diagrams (Simplified IEEE Standard)
+# Campus Connect - UML Diagrams
 
-Simple and clean UML diagrams following IEEE 1016-2009 and UML 2.5 standards.
+Professional UML diagrams representing the Campus Connect mobile application architecture.
 
 ---
 
 ## 1. Class Diagram
 
-**Purpose:** Shows the main classes and how they relate to each other.
+**Purpose:** Shows the main classes and their relationships in the system.
 
 ```plantuml
 @startuml
 title Class Diagram - Campus Connect System
 
-' Core Domain Models
+' Models
 class AppUser {
-  + id : String
-  + email : String
-  + name : String
-  + role : String
-  + isStudent()
-  + isFaculty()
+  - id : String
+  - email : String
+  - name : String
+  - role : String
+  - profilePic : String?
+  - department : String?
+  - office : String?
+  - officeHours : String?
+  - createdAt : DateTime?
+  - updatedAt : DateTime?
+  + isStudent() : bool
+  + isFaculty() : bool
+  + copyWith() : AppUser
+  + toJson() : Map
+  + fromJson() : AppUser
 }
 
 class Event {
-  + id : String
-  + title : String
-  + location : String
-  + time : DateTime
-  + createdBy : String
+  - id : String
+  - title : String
+  - description : String?
+  - location : String?
+  - locationId : String?
+  - time : DateTime
+  - createdBy : String?
+  - createdAt : DateTime?
+  - updatedAt : DateTime?
+  + copyWith() : Event
+  + toJson() : Map
+  + fromJson() : Event
 }
 
 class Faculty {
-  + userId : String
-  + department : String
-  + officeLocation : String
+  - id : String
+  - userId : String
+  - department : String
+  - designation : String?
+  - officeLocation : String?
+  - officeHours : String?
+  - phone : String?
+  - researchInterests : List<String>?
+  - user : Map?
+  + userName : String?
+  + userEmail : String?
+  + copyWith() : Faculty
 }
 
 class CampusLocation {
-  + name : String
-  + lat : Double
-  + lng : Double
+  - id : String
+  - name : String
+  - buildingCode : String?
+  - lat : double
+  - lng : double
+  - description : String?
+  - createdAt : DateTime?
+  + copyWith() : CampusLocation
 }
 
-' Repositories (Data Access)
+class AppNotification {
+  - id : String
+  - userId : String?
+  - eventId : String?
+  - type : String
+  - title : String?
+  - message : String
+  - sentAt : DateTime
+  - read : bool
+  + copyWith() : AppNotification
+}
+
+' Repositories
 class AuthRepository {
-  + signIn()
-  + signUp()
-  + signOut()
-  + getUserProfile()
+  - _supabaseService : SupabaseService
+  + signUp() : Future<AppUser?>
+  + signIn() : Future<AppUser?>
+  + signOut() : Future<void>
+  + getUserProfile() : Future<AppUser?>
+  + updateProfile() : Future<AppUser?>
+  + isAuthenticated() : bool
+  + authStateChanges() : Stream
 }
 
 class EventRepository {
-  + getAllEvents()
-  + createEvent()
-  + updateEvent()
-  + deleteEvent()
+  - _client : SupabaseClient
+  - _cachedEvents : List<Event>?
+  + getAllEvents() : Future<List<Event>>
+  + getEventsByDateRange() : Future<List<Event>>
+  + createEvent() : Future<Event>
+  + updateEvent() : Future<Event>
+  + deleteEvent() : Future<void>
 }
 
-' Providers (State Management)
+class FacultyRepository {
+  - _client : SupabaseClient
+  + getAllFaculty() : Future<List<Faculty>>
+  + getFacultyById() : Future<Faculty?>
+  + updateFaculty() : Future<Faculty>
+  + searchFaculty() : Future<List<Faculty>>
+}
+
+class LocationRepository {
+  - _client : SupabaseClient
+  + getAllLocations() : Future<List<CampusLocation>>
+  + getLocationById() : Future<CampusLocation?>
+  + searchLocations() : Future<List<CampusLocation>>
+}
+
+class NotificationRepository {
+  - _client : SupabaseClient
+  + getUserNotifications() : Future<List<AppNotification>>
+  + markAsRead() : Future<void>
+  + sendNotification() : Future<void>
+}
+
+' Providers
 class AuthProvider {
-  + currentUser : AppUser
-  + isAuthenticated : Boolean
-  + signIn()
-  + signOut()
+  - _authRepository : AuthRepository
+  - _currentUser : AppUser?
+  - _isLoading : bool
+  - _errorMessage : String?
+  + currentUser : AppUser?
+  + isAuthenticated : bool
+  + isStudent : bool
+  + isFaculty : bool
+  + signIn() : Future<void>
+  + signUp() : Future<void>
+  + signOut() : Future<void>
+  + updateProfile() : Future<void>
 }
 
 class EventProvider {
-  + events : List
-  + loadEvents()
-  + createEvent()
+  - _eventRepository : EventRepository
+  - _events : List<Event>
+  - _isLoading : bool
+  + events : List<Event>
+  + loadEvents() : Future<void>
+  + createEvent() : Future<void>
+  + updateEvent() : Future<void>
+  + deleteEvent() : Future<void>
+}
+
+class FacultyProvider {
+  - _facultyRepository : FacultyRepository
+  - _facultyList : List<Faculty>
+  - _isLoading : bool
+  + facultyList : List<Faculty>
+  + loadFaculty() : Future<void>
+  + updateFaculty() : Future<void>
+  + searchFaculty() : Future<void>
+}
+
+class NotificationProvider {
+  - _notificationRepository : NotificationRepository
+  - _notifications : List<AppNotification>
+  - _unreadCount : int
+  + notifications : List<AppNotification>
+  + unreadCount : int
+  + loadNotifications() : Future<void>
+  + markAsRead() : Future<void>
 }
 
 ' Services
 class SupabaseService {
-  + client
-  + initialize()
+  - _client : SupabaseClient?
+  - _isInitialized : bool
+  + {static} instance : SupabaseService
+  + client : SupabaseClient
+  + initialize() : Future<void>
 }
 
-' Simple Relationships
-AppUser "1" -- "0..1" Faculty
-Event "*" --> "1" AppUser
-Event "*" --> "0..1" CampusLocation
+class ImageUploadService {
+  - _client : SupabaseClient
+  + uploadProfilePicture() : Future<String>
+  + uploadEventImage() : Future<String>
+  + deleteImage() : Future<void>
+}
 
-AuthProvider --> AuthRepository
-EventProvider --> EventRepository
+class DirectionsService {
+  + getDirections() : Future<Directions>
+  + decodePolyline() : List<LatLng>
+}
 
-AuthRepository ..> SupabaseService
-EventRepository ..> SupabaseService
+class StorageService {
+  + {static} instance : StorageService
+  + saveValue() : Future<void>
+  + getValue() : Future<String?>
+  + deleteValue() : Future<void>
+}
+
+' Relationships - Models
+AppUser "1" -- "0..1" Faculty : has profile >
+Event "*" --> "1" AppUser : created by >
+Event "*" --> "0..1" CampusLocation : located at >
+AppNotification "*" --> "1" AppUser : sent to >
+AppNotification "*" --> "0..1" Event : about >
+
+' Relationships - Providers to Repositories
+AuthProvider --> AuthRepository : uses >
+EventProvider --> EventRepository : uses >
+FacultyProvider --> FacultyRepository : uses >
+NotificationProvider --> NotificationRepository : uses >
+
+' Relationships - Repositories to Services
+AuthRepository ..> SupabaseService : depends on >
+EventRepository ..> SupabaseService : depends on >
+FacultyRepository ..> SupabaseService : depends on >
+LocationRepository ..> SupabaseService : depends on >
+NotificationRepository ..> SupabaseService : depends on >
+
+' Relationships - Services
+ImageUploadService ..> SupabaseService : depends on >
 
 @enduml
 ```
 
-**Key Classes:**
-- **Models** (`lib/core/models/`): AppUser, Event, Faculty, CampusLocation
-- **Repositories** (`lib/features/*/data/`): Handle database operations
-- **Providers** (`lib/core/providers/`): Manage app state
-- **Services** (`lib/core/services/`): External integrations (Supabase)
+**Key Components:**
+- **Models** (`lib/core/models/`): Data structures - AppUser, Event, Faculty, CampusLocation, AppNotification
+- **Repositories** (`lib/features/*/data/`): Database operations and business logic
+- **Providers** (`lib/core/providers/` & `lib/features/*/presentation/`): State management using Provider pattern
+- **Services** (`lib/core/services/`): External integrations (Supabase, Storage, Image Upload, Directions)
 
 **Relationships:**
-- `-->` Uses/Depends on
-- `--` Simple association
-- `..>` Creates/Instantiates
+- `-->` Association/Uses
+- `--` Direct relationship
+- `..>` Dependency
 
 ---
 
@@ -115,72 +253,136 @@ left to right direction
 
 actor Student
 actor Faculty
-actor "Backend\nSystem" as Backend
+actor "Supabase\nBackend" as Backend
 
 rectangle "Campus Connect" {
   
   ' Authentication
-  (Login) as login
-  (Register) as register
-  (Edit Profile) as profile
+  package "Authentication" {
+    (Login) as login
+    (Register) as register
+    (Edit Profile) as editProfile
+    (Upload Profile Picture) as uploadPic
+  }
   
   ' Events
-  (View Events) as viewEvents
-  (Create Event) as createEvent
-  (Manage Events) as manageEvents
+  package "Events" {
+    (View Events) as viewEvents
+    (View Event Details) as eventDetails
+    (Create Event) as createEvent
+    (Edit Event) as editEvent
+    (Delete Event) as deleteEvent
+    (Open Event Location in Maps) as eventMaps
+  }
   
   ' Faculty
-  (Browse Faculty) as browseFaculty
-  (Search Faculty) as searchFaculty
+  package "Faculty Directory" {
+    (Browse Faculty) as browseFaculty
+    (View Faculty Details) as facultyDetails
+    (Search Faculty) as searchFaculty
+    (Navigate to Office) as navigateOffice
+    (Contact Faculty) as contactFaculty
+  }
   
   ' Map
-  (View Campus Map) as map
-  (Get Directions) as directions
+  package "Campus Map" {
+    (View Campus Map) as viewMap
+    (Get Directions) as getDirections
+    (View My Location) as myLocation
+    (Search Locations) as searchLocations
+  }
   
   ' Notifications
-  (View Notifications) as notifications
+  package "Notifications" {
+    (View Notifications) as viewNotifications
+    (Receive Push Notifications) as pushNotif
+    (Mark as Read) as markRead
+  }
+  
+  ' Search
+  package "Search" {
+    (Global Search) as globalSearch
+    (Search Events) as searchEvents
+    (Search History) as searchHistory
+  }
 }
 
-' Student can do these
+' Student use cases
 Student --> login
 Student --> register
-Student --> profile
+Student --> editProfile
+Student --> uploadPic
 Student --> viewEvents
+Student --> eventDetails
+Student --> eventMaps
 Student --> browseFaculty
+Student --> facultyDetails
 Student --> searchFaculty
-Student --> map
-Student --> directions
-Student --> notifications
+Student --> navigateOffice
+Student --> contactFaculty
+Student --> viewMap
+Student --> getDirections
+Student --> myLocation
+Student --> searchLocations
+Student --> viewNotifications
+Student --> pushNotif
+Student --> markRead
+Student --> globalSearch
+Student --> searchEvents
+Student --> searchHistory
 
-' Faculty can do everything Student can PLUS create/manage events
+' Faculty use cases (includes all Student capabilities)
 Faculty --> login
 Faculty --> register
-Faculty --> profile
+Faculty --> editProfile
+Faculty --> uploadPic
 Faculty --> viewEvents
+Faculty --> eventDetails
 Faculty --> createEvent
-Faculty --> manageEvents
+Faculty --> editEvent
+Faculty --> deleteEvent
+Faculty --> eventMaps
 Faculty --> browseFaculty
+Faculty --> facultyDetails
 Faculty --> searchFaculty
-Faculty --> map
-Faculty --> directions
-Faculty --> notifications
+Faculty --> navigateOffice
+Faculty --> contactFaculty
+Faculty --> viewMap
+Faculty --> getDirections
+Faculty --> myLocation
+Faculty --> searchLocations
+Faculty --> viewNotifications
+Faculty --> pushNotif
+Faculty --> markRead
+Faculty --> globalSearch
+Faculty --> searchEvents
+Faculty --> searchHistory
 
-' Backend handles data
-login ..> Backend
-register ..> Backend
-viewEvents ..> Backend
-createEvent ..> Backend
-browseFaculty ..> Backend
+' Backend interactions
+login ..> Backend : authenticate
+register ..> Backend : create user
+editProfile ..> Backend : update
+uploadPic ..> Backend : store
+viewEvents ..> Backend : fetch
+createEvent ..> Backend : create
+editEvent ..> Backend : update
+deleteEvent ..> Backend : remove
+browseFaculty ..> Backend : fetch
+viewMap ..> Backend : fetch locations
+viewNotifications ..> Backend : fetch
+pushNotif ..> Backend : FCM
+globalSearch ..> Backend : query
 
 @enduml
 ```
 
 **Main Features:**
-- **Authentication**: Login, Register, Edit Profile
-- **Events**: View, Create (Faculty only), Manage (Faculty only)
-- **Faculty Directory**: Browse and Search faculty members
-- **Campus Map**: View map and get directions
-- **Notifications**: View event notifications
+- **Authentication**: Login, Register, Edit Profile, Upload Profile Picture
+- **Events**: View, Create (Faculty), Edit (Faculty), Delete (Faculty), Open in Maps
+- **Faculty Directory**: Browse, Search, View Details, Navigate to Office, Contact
+- **Campus Map**: Interactive map, Directions, My Location, Search Locations
+- **Notifications**: View, Push Notifications (FCM), Mark as Read
+- **Search**: Global Search across Events, Faculty, and Locations
 
 ---
 
