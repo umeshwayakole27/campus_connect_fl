@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/providers/auth_provider.dart';
 import '../../core/theme/app_text_styles.dart' as theme_styles;
 import '../../core/theme/app_decorations.dart';
@@ -176,11 +177,30 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen>
                             width: 2,
                           ),
                         ),
-                        child: Icon(
-                          Icons.person,
-                          color: Theme.of(context).colorScheme.onPrimary,
-                          size: 28,
-                        ),
+                        child: user?.profilePic != null && user!.profilePic!.isNotEmpty
+                            ? ClipOval(
+                                child: CachedNetworkImage(
+                                  imageUrl: user.profilePic!,
+                                  fit: BoxFit.cover,
+                                  width: 52,
+                                  height: 52,
+                                  placeholder: (context, url) => Icon(
+                                    Icons.person,
+                                    color: Theme.of(context).colorScheme.onPrimary,
+                                    size: 28,
+                                  ),
+                                  errorWidget: (context, url, error) => Icon(
+                                    Icons.person,
+                                    color: Theme.of(context).colorScheme.onPrimary,
+                                    size: 28,
+                                  ),
+                                ),
+                              )
+                            : Icon(
+                                Icons.person,
+                                color: Theme.of(context).colorScheme.onPrimary,
+                                size: 28,
+                              ),
                       ),
                     ),
                   ],
