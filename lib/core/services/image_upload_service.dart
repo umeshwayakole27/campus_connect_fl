@@ -191,37 +191,52 @@ class ImageUploadService {
     String? oldImageUrl,
   }) async {
     try {
+      final stopwatch = Stopwatch()..start();
+      
       // Step 1: Pick image
+      AppLogger.logInfo('📷 Starting image selection...');
       final File? pickedImage = await pickImage(source: source);
       if (pickedImage == null) {
-        AppLogger.logInfo('No image selected');
+        AppLogger.logInfo('❌ No image selected');
         return null;
       }
+      AppLogger.logInfo('✅ Image selected (${stopwatch.elapsedMilliseconds}ms)');
 
       // Step 2: Crop image
+      AppLogger.logInfo('✂️ Cropping image...');
       final File? croppedImage = await cropImage(imageFile: pickedImage);
       if (croppedImage == null) {
-        AppLogger.logInfo('Image cropping cancelled');
+        AppLogger.logInfo('❌ Image cropping cancelled');
         return null;
       }
+      AppLogger.logInfo('✅ Image cropped (${stopwatch.elapsedMilliseconds}ms)');
 
       // Step 3: Compress image
+      AppLogger.logInfo('🗜️ Compressing image...');
+      final startCompress = stopwatch.elapsedMilliseconds;
       final File? compressedImage = await compressImage(imageFile: croppedImage);
       if (compressedImage == null) {
-        AppLogger.logInfo('Image compression failed');
+        AppLogger.logInfo('❌ Image compression failed');
         return null;
       }
+      final compressTime = stopwatch.elapsedMilliseconds - startCompress;
+      AppLogger.logInfo('✅ Compression done in ${compressTime}ms (total: ${stopwatch.elapsedMilliseconds}ms)');
 
       // Step 4: Delete old image if exists
       if (oldImageUrl != null && oldImageUrl.isNotEmpty) {
+        AppLogger.logInfo('🗑️ Deleting old image...');
         await deleteProfileImage(oldImageUrl);
       }
 
       // Step 5: Upload to Supabase
+      AppLogger.logInfo('☁️ Uploading to Supabase Storage...');
+      final startUpload = stopwatch.elapsedMilliseconds;
       final String? imageUrl = await uploadProfileImage(
         imageFile: compressedImage,
         userId: userId,
       );
+      final uploadTime = stopwatch.elapsedMilliseconds - startUpload;
+      AppLogger.logInfo('✅ Upload completed in ${uploadTime}ms');
 
       // Clean up temporary files
       try {
@@ -234,6 +249,9 @@ class ImageUploadService {
         AppLogger.logError('Failed to clean up temp files', error: e);
       }
 
+      stopwatch.stop();
+      AppLogger.logInfo('🎉 Total time: ${stopwatch.elapsedMilliseconds}ms (~${(stopwatch.elapsedMilliseconds / 1000).toStringAsFixed(1)}s)');
+      
       return imageUrl;
     } catch (e) {
       AppLogger.logError('Failed to process and upload image', error: e);

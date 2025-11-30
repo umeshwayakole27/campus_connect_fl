@@ -289,61 +289,61 @@ class ProfileScreen extends StatelessWidget {
     ImageSource source,
   ) async {
     try {
-      // Show loading dialog
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => const Center(
-          child: Card(
-            child: Padding(
-              padding: EdgeInsets.all(20.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text('Uploading image...'),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
-
       final user = authProvider.currentUser;
-      if (user == null) {
-        if (context.mounted) Navigator.pop(context);
-        return;
-      }
+      if (user == null) return;
 
-      // Pick, crop, compress, and upload image
+      // Step 1: Pick and crop image (with its own UI)
       final imageUrl = await ImageUploadService.instance.pickCropCompressAndUpload(
         source: source,
         userId: user.id,
         oldImageUrl: user.profilePic,
       );
 
-      if (context.mounted) {
-        Navigator.pop(context); // Close loading dialog
+      if (imageUrl == null) {
+        // User cancelled
+        return;
       }
 
-      if (imageUrl != null) {
-        // Update profile with new image URL
-        final success = await authProvider.updateProfile(profilePic: imageUrl);
+      // Step 2: Show uploading dialog ONLY during database update
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const Center(
+            child: Card(
+              child: Padding(
+                padding: EdgeInsets.all(20.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Saving profile picture...'),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      // Step 3: Update profile in database
+      final success = await authProvider.updateProfile(profilePic: imageUrl);
+
+      if (context.mounted) {
+        Navigator.pop(context); // Close loading dialog
         
-        if (context.mounted) {
-          if (success) {
-            AppUtils.showSnackBar(
-              context,
-              'Profile picture updated successfully',
-            );
-          } else {
-            AppUtils.showSnackBar(
-              context,
-              'Failed to update profile picture',
-              isError: true,
-            );
-          }
+        if (success) {
+          AppUtils.showSnackBar(
+            context,
+            'Profile picture updated successfully',
+          );
+        } else {
+          AppUtils.showSnackBar(
+            context,
+            'Failed to update profile picture',
+            isError: true,
+          );
         }
       }
     } catch (e) {
