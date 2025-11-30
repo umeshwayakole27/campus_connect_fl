@@ -35,6 +35,13 @@ class ProfileScreen extends StatelessWidget {
         builder: (context, authProvider, child) {
           final user = authProvider.currentUser;
 
+          // Debug logging
+          debugPrint('=== PROFILE SCREEN DEBUG ===');
+          debugPrint('User: ${user?.name}');
+          debugPrint('Profile Pic: ${user?.profilePic}');
+          debugPrint('Has profile pic: ${user?.profilePic != null && user!.profilePic!.isNotEmpty}');
+          debugPrint('============================');
+
           if (user == null) {
             return const Center(
               child: Text('No user data available'),

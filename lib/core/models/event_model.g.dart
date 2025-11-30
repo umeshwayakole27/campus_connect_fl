@@ -33,5 +33,4 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
   'created_by': instance.createdBy,
   'created_at': instance.createdAt?.toIso8601String(),
   'updated_at': instance.updatedAt?.toIso8601String(),
-  'creator': instance.creator,
 };

@@ -9,11 +9,15 @@ class AppUser extends Equatable {
   final String email;
   final String name;
   final String role; // 'student' or 'faculty'
+  @JsonKey(name: 'profile_pic')
   final String? profilePic;
   final String? department;
   final String? office;
+  @JsonKey(name: 'office_hours')
   final String? officeHours;
+  @JsonKey(name: 'created_at')
   final DateTime? createdAt;
+  @JsonKey(name: 'updated_at')
   final DateTime? updatedAt;
 
   const AppUser({

@@ -11,16 +11,16 @@ AppUser _$AppUserFromJson(Map<String, dynamic> json) => AppUser(
   email: json['email'] as String,
   name: json['name'] as String,
   role: json['role'] as String,
-  profilePic: json['profilePic'] as String?,
+  profilePic: json['profile_pic'] as String?,
   department: json['department'] as String?,
   office: json['office'] as String?,
-  officeHours: json['officeHours'] as String?,
-  createdAt: json['createdAt'] == null
+  officeHours: json['office_hours'] as String?,
+  createdAt: json['created_at'] == null
       ? null
-      : DateTime.parse(json['createdAt'] as String),
-  updatedAt: json['updatedAt'] == null
+      : DateTime.parse(json['created_at'] as String),
+  updatedAt: json['updated_at'] == null
       ? null
-      : DateTime.parse(json['updatedAt'] as String),
+      : DateTime.parse(json['updated_at'] as String),
 );
 
 Map<String, dynamic> _$AppUserToJson(AppUser instance) => <String, dynamic>{
@@ -28,10 +28,10 @@ Map<String, dynamic> _$AppUserToJson(AppUser instance) => <String, dynamic>{
   'email': instance.email,
   'name': instance.name,
   'role': instance.role,
-  'profilePic': instance.profilePic,
+  'profile_pic': instance.profilePic,
   'department': instance.department,
   'office': instance.office,
-  'officeHours': instance.officeHours,
-  'createdAt': instance.createdAt?.toIso8601String(),
-  'updatedAt': instance.updatedAt?.toIso8601String(),
+  'office_hours': instance.officeHours,
+  'created_at': instance.createdAt?.toIso8601String(),
+  'updated_at': instance.updatedAt?.toIso8601String(),
 };

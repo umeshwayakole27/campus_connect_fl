@@ -20,7 +20,7 @@ class Event extends Equatable {
   final DateTime? updatedAt;
   
   // Nested creator data
-  @JsonKey(name: 'creator')
+  @JsonKey(name: 'creator', includeToJson: false)
   final Map<String, dynamic>? creator;
   
   // Getter for creator name

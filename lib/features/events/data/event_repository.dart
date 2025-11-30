@@ -118,15 +118,12 @@ class EventRepository {
       eventData.remove('id'); // Let database generate UUID
       eventData.remove('created_at'); // Use database default
       eventData.remove('updated_at'); // Use database default
+      eventData.remove('creator'); // Remove nested data, not a column
       
       final response = await _client
           .from('events')
           .insert(eventData)
-          .select('''
-            *,
-            creator:users!events_created_by_fkey(id, name),
-            event_location:campus_locations(id, name, building_code, lat, lng)
-          ''')
+          .select()
           .single();
 
       // Clear cache
@@ -148,17 +145,14 @@ class EventRepository {
       eventData.remove('id'); // Don't update ID
       eventData.remove('created_by'); // Don't change creator
       eventData.remove('created_at'); // Don't change creation date
+      eventData.remove('creator'); // Remove nested data, not a column
       // Keep updated_at as it should be updated
       
       final response = await _client
           .from('events')
           .update(eventData)
           .eq('id', id)
-          .select('''
-            *,
-            creator:users!events_created_by_fkey(id, name),
-            event_location:campus_locations(id, name, building_code, lat, lng)
-          ''')
+          .select()
           .single();
 
       // Clear cache

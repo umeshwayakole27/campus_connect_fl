@@ -108,6 +108,13 @@ class _EnhancedHomeScreenState extends State<EnhancedHomeScreen>
   Widget _buildWelcomeSection() {
     final user = context.watch<AuthProvider>().currentUser;
 
+    // Debug logging
+    debugPrint('=== HOME SCREEN DEBUG ===');
+    debugPrint('User: ${user?.name}');
+    debugPrint('Profile Pic: ${user?.profilePic}');
+    debugPrint('Has profile pic: ${user?.profilePic != null && user!.profilePic!.isNotEmpty}');
+    debugPrint('=========================');
+
     return FadeTransition(
       opacity: _fadeAnimation,
       child: SlideTransition(
