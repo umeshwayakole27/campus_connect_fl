@@ -11,6 +11,90 @@ const admin = require('firebase-admin');
 admin.initializeApp();
 
 /**
+ * Send event notification to all users via FCM topic
+ * @param {Object} data - {title, body, eventData}
+ * @param {Object} context - Authentication context
+ */
+exports.sendEventNotification = onCall(async (request) => {
+  const {data, auth} = request;
+
+  // Check if user is authenticated and is faculty
+  if (!auth) {
+    throw new HttpsError('unauthenticated', 'User must be authenticated');
+  }
+
+  logger.info('Event notification requested by user:', auth.uid);
+
+  // Validate input
+  const {title, body, eventData} = data;
+  
+  if (!title || !body) {
+    throw new HttpsError(
+      'invalid-argument',
+      'Title and body are required'
+    );
+  }
+
+  try {
+    // Create the notification payload
+    const payload = {
+      notification: {
+        title: title,
+        body: body,
+      },
+      data: {
+        type: 'new_event',
+        event_id: eventData?.event_id || '',
+        event_title: eventData?.event_title || '',
+        event_time: eventData?.event_time || '',
+        event_location: eventData?.event_location || '',
+        click_action: 'FLUTTER_NOTIFICATION_CLICK',
+        timestamp: Date.now().toString(),
+      },
+      // Android specific config
+      android: {
+        priority: 'high',
+        notification: {
+          channelId: 'campus_connect_channel',
+          sound: 'default',
+          defaultVibrateTimings: true,
+          icon: '@mipmap/ic_launcher',
+        },
+      },
+      // iOS specific config
+      apns: {
+        payload: {
+          aps: {
+            sound: 'default',
+            badge: 1,
+            contentAvailable: true,
+          },
+        },
+      },
+    };
+
+    // Send to topic 'all_events'
+    const response = await admin.messaging().sendToTopic('all_events', payload);
+
+    logger.info('Event notification sent successfully:', {
+      messageId: response.messageId,
+      title,
+      eventId: eventData?.event_id,
+    });
+
+    return {
+      success: true,
+      message: 'Event notification sent successfully',
+      messageId: response.messageId,
+      successCount: response.successCount || 1,
+    };
+  } catch (error) {
+    logger.error('Error sending event notification:', error);
+    throw new HttpsError('internal', 'Failed to send notification: ' + error.message);
+  }
+});
+
+/**
  * Send broadcast notification to all users via FCM topics
  * @param {Object} data - {title, message, type}
  * @param {Object} context - Authentication context

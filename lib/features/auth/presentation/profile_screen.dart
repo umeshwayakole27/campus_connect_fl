@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../../../core/theme.dart';
 import '../../../core/utils.dart';
+import '../../../core/services/image_upload_service.dart';
 import 'edit_profile_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -43,31 +46,55 @@ class ProfileScreen extends StatelessWidget {
               children: [
                 const SizedBox(height: 24),
                 
-                // Profile picture
-                CircleAvatar(
-                  radius: 60,
-                  backgroundColor: AppTheme.primaryColor,
-                  child: user.profilePic != null
-                      ? ClipOval(
-                          child: Image.network(
-                            user.profilePic!,
-                            width: 120,
-                            height: 120,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Icon(
-                                Icons.person,
-                                size: 60,
-                                color: Theme.of(context).colorScheme.onPrimary,
-                              );
-                            },
+                // Profile picture with upload button
+                Stack(
+                  children: [
+                    CircleAvatar(
+                      radius: 60,
+                      backgroundColor: AppTheme.primaryColor,
+                      child: user.profilePic != null && user.profilePic!.isNotEmpty
+                          ? ClipOval(
+                              child: CachedNetworkImage(
+                                imageUrl: user.profilePic!,
+                                width: 120,
+                                height: 120,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => const CircularProgressIndicator(),
+                                errorWidget: (context, url, error) => Icon(
+                                  Icons.person,
+                                  size: 60,
+                                  color: Theme.of(context).colorScheme.onPrimary,
+                                ),
+                              ),
+                            )
+                          : Icon(
+                              Icons.person,
+                              size: 60,
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: Material(
+                        color: Theme.of(context).colorScheme.primary,
+                        shape: const CircleBorder(),
+                        elevation: 4,
+                        child: InkWell(
+                          onTap: () => _showImageSourceDialog(context, authProvider),
+                          customBorder: const CircleBorder(),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Icon(
+                              Icons.camera_alt,
+                              size: 20,
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
                           ),
-                        )
-                      : Icon(
-                          Icons.person,
-                          size: 60,
-                          color: Theme.of(context).colorScheme.onPrimary,
                         ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 16),
                 
@@ -211,5 +238,155 @@ class ProfileScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _showImageSourceDialog(BuildContext context, AuthProvider authProvider) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_camera),
+              title: const Text('Take Photo'),
+              onTap: () {
+                Navigator.pop(context);
+                _uploadProfilePicture(context, authProvider, ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Choose from Gallery'),
+              onTap: () {
+                Navigator.pop(context);
+                _uploadProfilePicture(context, authProvider, ImageSource.gallery);
+              },
+            ),
+            if (authProvider.currentUser?.profilePic != null &&
+                authProvider.currentUser!.profilePic!.isNotEmpty)
+              ListTile(
+                leading: const Icon(Icons.delete, color: Colors.red),
+                title: const Text('Remove Photo', style: TextStyle(color: Colors.red)),
+                onTap: () {
+                  Navigator.pop(context);
+                  _removeProfilePicture(context, authProvider);
+                },
+              ),
+            ListTile(
+              leading: const Icon(Icons.cancel),
+              title: const Text('Cancel'),
+              onTap: () => Navigator.pop(context),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _uploadProfilePicture(
+    BuildContext context,
+    AuthProvider authProvider,
+    ImageSource source,
+  ) async {
+    try {
+      // Show loading dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: Card(
+            child: Padding(
+              padding: EdgeInsets.all(20.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('Uploading image...'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final user = authProvider.currentUser;
+      if (user == null) {
+        if (context.mounted) Navigator.pop(context);
+        return;
+      }
+
+      // Pick, crop, compress, and upload image
+      final imageUrl = await ImageUploadService.instance.pickCropCompressAndUpload(
+        source: source,
+        userId: user.id,
+        oldImageUrl: user.profilePic,
+      );
+
+      if (context.mounted) {
+        Navigator.pop(context); // Close loading dialog
+      }
+
+      if (imageUrl != null) {
+        // Update profile with new image URL
+        final success = await authProvider.updateProfile(profilePic: imageUrl);
+        
+        if (context.mounted) {
+          if (success) {
+            AppUtils.showSnackBar(
+              context,
+              'Profile picture updated successfully',
+            );
+          } else {
+            AppUtils.showSnackBar(
+              context,
+              'Failed to update profile picture',
+              isError: true,
+            );
+          }
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.pop(context); // Close loading dialog
+        AppUtils.showSnackBar(
+          context,
+          'Error: ${e.toString()}',
+          isError: true,
+        );
+      }
+    }
+  }
+
+  Future<void> _removeProfilePicture(
+    BuildContext context,
+    AuthProvider authProvider,
+  ) async {
+    final confirmed = await AppUtils.showConfirmDialog(
+      context,
+      title: 'Remove Profile Picture',
+      message: 'Are you sure you want to remove your profile picture?',
+      confirmText: 'Remove',
+      cancelText: 'Cancel',
+    );
+
+    if (confirmed && context.mounted) {
+      final success = await authProvider.updateProfile(profilePic: '');
+      
+      if (context.mounted) {
+        if (success) {
+          AppUtils.showSnackBar(
+            context,
+            'Profile picture removed successfully',
+          );
+        } else {
+          AppUtils.showSnackBar(
+            context,
+            'Failed to remove profile picture',
+            isError: true,
+          );
+        }
+      }
+    }
   }
 }

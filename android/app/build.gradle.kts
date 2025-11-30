@@ -60,14 +60,27 @@ android {
         getByName("release") {
             val googleMapsApiKey = envProps.getProperty("GOOGLE_MAPS_API_KEY") ?: ""
             resValue("string", "google_maps_key", googleMapsApiKey)
+            
+            // Enable code shrinking, obfuscation, and optimization
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            
+            // Signing with debug keys for now
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
 
-    buildTypes {
-        release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+    // Split APKs by ABI to reduce size
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("armeabi-v7a", "arm64-v8a", "x86_64")
+            isUniversalApk = true
         }
     }
 }

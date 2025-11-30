@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
+import 'package:intl/intl.dart';
 import '../../../core/models/event_model.dart';
 import '../data/event_repository.dart';
+import '../../notifications/services/fcm_service.dart';
 
 class EventProvider with ChangeNotifier {
   final EventRepository _repository = EventRepository();
@@ -84,6 +86,10 @@ class EventProvider with ChangeNotifier {
         _events.insert(0, createdEvent);
         _isLoading = false;
         notifyListeners();
+        
+        // Send notification to all users
+        await _sendEventNotification(createdEvent);
+        
         return true;
       }
       _isLoading = false;
@@ -94,6 +100,38 @@ class EventProvider with ChangeNotifier {
       _isLoading = false;
       notifyListeners();
       return false;
+    }
+  }
+
+  /// Send notification for new event
+  Future<void> _sendEventNotification(Event event) async {
+    try {
+      // Format event time
+      final dateFormat = DateFormat('EEEE, MMM dd');
+      final timeFormat = DateFormat('h:mm a');
+      final eventDate = dateFormat.format(event.time);
+      final eventTime = timeFormat.format(event.time);
+      
+      // Create notification title and body
+      final title = '📅 New Event: ${event.title}';
+      final body = '$eventDate at $eventTime${event.location != null ? '\n📍 ${event.location}' : ''}';
+      
+      // Send via FCM topic (all users subscribed to 'all_events')
+      await FCMService().sendTopicNotification(
+        topic: 'all_events',
+        title: title,
+        body: body,
+        data: {
+          'type': 'new_event',
+          'event_id': event.id,
+          'event_title': event.title,
+          'event_time': event.time.toIso8601String(),
+          'event_location': event.location ?? '',
+        },
+      );
+    } catch (e) {
+      // Don't fail event creation if notification fails
+      debugPrint('Failed to send event notification: $e');
     }
   }
 

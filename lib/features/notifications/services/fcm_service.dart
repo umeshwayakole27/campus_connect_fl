@@ -212,6 +212,36 @@ class FCMService {
     }
   }
 
+  /// Send notification to a topic (requires backend Cloud Function)
+  Future<void> sendTopicNotification({
+    required String topic,
+    required String title,
+    required String body,
+    Map<String, dynamic>? data,
+  }) async {
+    try {
+      final supabase = Supabase.instance.client;
+      
+      // Determine which function to call based on topic
+      final functionName = topic == 'all_events' ? 'sendEventNotification' : 'sendBroadcastNotification';
+      
+      // Call Firebase Cloud Function
+      await supabase.functions.invoke(
+        functionName,
+        body: {
+          'title': title,
+          'body': body,
+          'eventData': data,
+        },
+      );
+      
+      print('✅ Notification sent to topic: $topic');
+    } catch (e) {
+      print('❌ Error sending notification: $e');
+      // Don't throw - notification failure shouldn't block the main operation
+    }
+  }
+
   // Clear notifications
   Future<void> clearAllNotifications() async {
     await _localNotifications.cancelAll();

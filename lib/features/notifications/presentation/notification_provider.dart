@@ -33,12 +33,13 @@ class NotificationProvider extends ChangeNotifier {
     try {
       await _fcmService.initialize();
       
-      // Subscribe to general topics
+      // Subscribe to general topics for all users
       await _fcmService.subscribeToTopic('all_users');
+      await _fcmService.subscribeToTopic('all_events');
       
-      debugPrint('FCM initialized and subscribed to topics');
+      debugPrint('✅ FCM initialized and subscribed to topics: all_users, all_events');
     } catch (e) {
-      debugPrint('Error initializing FCM: $e');
+      debugPrint('❌ Error initializing FCM: $e');
     }
   }
 

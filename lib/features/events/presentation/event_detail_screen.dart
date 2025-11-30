@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../../../core/models/event_model.dart';
 import '../../campus_map/data/location_repository.dart';
@@ -172,19 +173,19 @@ class EventDetailScreen extends StatelessWidget {
                         ),
                         subtitle: event.locationId != null
                             ? Text(
-                                'Tap to view on map',
+                                'Tap to open in maps',
                                 style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
                               )
                             : null,
                         trailing: event.locationId != null
                             ? Icon(
-                                Icons.arrow_forward_ios, 
-                                size: 16,
-                                color: theme.colorScheme.onSurfaceVariant,
+                                Icons.map, 
+                                size: 24,
+                                color: theme.colorScheme.primary,
                               )
                             : null,
                         onTap: event.locationId != null
-                            ? () => _navigateToMap(context, event.locationId!, event.location!)
+                            ? () => _openInMaps(context, event.locationId!, event.location!)
                             : null,
                       ),
                     ),
@@ -232,7 +233,117 @@ class EventDetailScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _navigateToMap(BuildContext context, String locationId, String locationName) async {
+  Future<void> _openInMaps(BuildContext context, String locationId, String locationName) async {
+    try {
+      // First, try to get location coordinates
+      final locationRepository = LocationRepository();
+      final location = await locationRepository.getLocationById(locationId);
+      
+      if (location != null) {
+        // Show dialog to choose between in-app map or external maps
+        if (context.mounted) {
+          await showModalBottomSheet(
+            context: context,
+            builder: (context) => SafeArea(
+              child: Wrap(
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.map),
+                    title: const Text('Open in Campus Map'),
+                    subtitle: const Text('View location within the app'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _navigateToMap(context, location, locationName);
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.navigation),
+                    title: const Text('Open in Google Maps'),
+                    subtitle: const Text('Get directions using Google Maps'),
+                    onTap: () async {
+                      Navigator.pop(context);
+                      await _launchGoogleMaps(context, location.lat, location.lng, locationName);
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.cancel),
+                    title: const Text('Cancel'),
+                    onTap: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+      } else if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Location not found'),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load location: $e'),
+          ),
+        );
+      }
+    }
+  }
+
+  void _navigateToMap(BuildContext context, dynamic location, String locationName) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CampusMapScreen(
+          targetLocation: LatLng(location.lat, location.lng),
+          targetLocationName: locationName,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _launchGoogleMaps(BuildContext context, double lat, double lng, String locationName) async {
+    // Try different URL schemes in order of preference
+    final List<String> mapUrls = [
+      // Google Maps app deep link (preferred)
+      'google.navigation:q=$lat,$lng',
+      // Google Maps web with query
+      'https://www.google.com/maps/search/?api=1&query=$lat,$lng',
+      // Fallback to basic maps URL
+      'https://maps.google.com/?q=$lat,$lng',
+    ];
+
+    bool launched = false;
+    
+    for (final urlString in mapUrls) {
+      try {
+        final Uri uri = Uri.parse(urlString);
+        if (await canLaunchUrl(uri)) {
+          launched = await launchUrl(
+            uri,
+            mode: LaunchMode.externalApplication,
+          );
+          if (launched) break;
+        }
+      } catch (e) {
+        // Continue to next URL
+        continue;
+      }
+    }
+
+    if (!launched && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not open maps. Please install Google Maps.'),
+        ),
+      );
+    }
+  }
+
+  Future<void> _navigateToMapOld(BuildContext context, String locationId, String locationName) async {
     try {
       final locationRepository = LocationRepository();
       final location = await locationRepository.getLocationById(locationId);
