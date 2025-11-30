@@ -24,7 +24,7 @@ class EventRepository {
           .from('events')
           .select('''
             *,
-            created_by_user:users!events_created_by_fkey(id, name, email),
+            creator:users!events_created_by_fkey(id, name),
             event_location:campus_locations(id, name, building_code, lat, lng)
           ''')
           .order('time', ascending: true);
@@ -51,7 +51,7 @@ class EventRepository {
           .from('events')
           .select('''
             *,
-            created_by_user:users!events_created_by_fkey(id, name, email),
+            creator:users!events_created_by_fkey(id, name),
             event_location:campus_locations(id, name, building_code, lat, lng)
           ''')
           .gte('time', start.toIso8601String())
@@ -75,7 +75,7 @@ class EventRepository {
           .from('events')
           .select('''
             *,
-            created_by_user:users!events_created_by_fkey(id, name, email),
+            creator:users!events_created_by_fkey(id, name),
             event_location:campus_locations(id, name, building_code, lat, lng)
           ''')
           .gte('time', now.toIso8601String())
@@ -97,7 +97,7 @@ class EventRepository {
           .from('events')
           .select('''
             *,
-            created_by_user:users!events_created_by_fkey(id, name, email),
+            creator:users!events_created_by_fkey(id, name),
             event_location:campus_locations(id, name, building_code, lat, lng)
           ''')
           .eq('id', id)
@@ -124,7 +124,7 @@ class EventRepository {
           .insert(eventData)
           .select('''
             *,
-            created_by_user:users!events_created_by_fkey(id, name, email),
+            creator:users!events_created_by_fkey(id, name),
             event_location:campus_locations(id, name, building_code, lat, lng)
           ''')
           .single();
@@ -156,7 +156,7 @@ class EventRepository {
           .eq('id', id)
           .select('''
             *,
-            created_by_user:users!events_created_by_fkey(id, name, email),
+            creator:users!events_created_by_fkey(id, name),
             event_location:campus_locations(id, name, building_code, lat, lng)
           ''')
           .single();

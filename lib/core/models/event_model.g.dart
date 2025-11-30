@@ -20,6 +20,7 @@ Event _$EventFromJson(Map<String, dynamic> json) => Event(
   updatedAt: json['updated_at'] == null
       ? null
       : DateTime.parse(json['updated_at'] as String),
+  creator: json['creator'] as Map<String, dynamic>?,
 );
 
 Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
@@ -32,4 +33,5 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
   'created_by': instance.createdBy,
   'created_at': instance.createdAt?.toIso8601String(),
   'updated_at': instance.updatedAt?.toIso8601String(),
+  'creator': instance.creator,
 };

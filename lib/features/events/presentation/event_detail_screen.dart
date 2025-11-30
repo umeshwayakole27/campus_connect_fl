@@ -205,11 +205,11 @@ class EventDetailScreen extends StatelessWidget {
                         ),
                       ),
                       title: Text(
-                        event.createdBy ?? 'Unknown',
+                        event.creatorName ?? 'Unknown',
                         style: TextStyle(color: theme.colorScheme.onSurface),
                       ),
                       subtitle: Text(
-                        'Faculty',
+                        'Organized by',
                         style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
                       ),
                     ),

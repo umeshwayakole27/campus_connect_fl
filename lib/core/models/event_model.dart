@@ -18,6 +18,13 @@ class Event extends Equatable {
   final DateTime? createdAt;
   @JsonKey(name: 'updated_at')
   final DateTime? updatedAt;
+  
+  // Nested creator data
+  @JsonKey(name: 'creator')
+  final Map<String, dynamic>? creator;
+  
+  // Getter for creator name
+  String? get creatorName => creator?['name'] as String?;
 
   const Event({
     required this.id,
@@ -29,6 +36,7 @@ class Event extends Equatable {
     this.createdBy,
     this.createdAt,
     this.updatedAt,
+    this.creator,
   });
 
   factory Event.fromJson(Map<String, dynamic> json) => _$EventFromJson(json);
@@ -44,6 +52,7 @@ class Event extends Equatable {
     String? createdBy,
     DateTime? createdAt,
     DateTime? updatedAt,
+    Map<String, dynamic>? creator,
   }) {
     return Event(
       id: id ?? this.id,
@@ -55,6 +64,7 @@ class Event extends Equatable {
       createdBy: createdBy ?? this.createdBy,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      creator: creator ?? this.creator,
     );
   }
 
@@ -69,5 +79,6 @@ class Event extends Equatable {
     createdBy,
     createdAt,
     updatedAt,
+    creator,
   ];
 }

@@ -100,43 +100,52 @@ EventRepository ..> SupabaseService
 @startuml
 title Use Case Diagram - Campus Connect
 
-actor Student
-actor Faculty
+left to right direction
 
-rectangle "Campus Connect" {
-  (Login) as login
-  (View Events) as viewEvents
-  (Create Event) as createEvent
-  (Browse Faculty) as browseFaculty
-  (Campus Map) as map
-  (Get Directions) as directions
-  (Notifications) as notif
-  (Search) as search
+actor Student as S
+actor Faculty as F
+
+package "Campus Connect System" {
+  
+  usecase "Login" as UC1
+  usecase "View Events" as UC2
+  usecase "Browse Faculty" as UC3
+  usecase "Campus Map" as UC4
+  usecase "Search" as UC5
+  usecase "Notifications" as UC6
+  usecase "Create Event" as UC7
+  usecase "Manage Events" as UC8
+  
 }
 
-Student --> login
-Student --> viewEvents
-Student --> browseFaculty
-Student --> map
-Student --> directions
-Student --> notif
-Student --> search
+' Student use cases
+S --> UC1
+S --> UC2
+S --> UC3
+S --> UC4
+S --> UC5
+S --> UC6
 
-Faculty --> login
-Faculty --> viewEvents
-Faculty --> createEvent
-Faculty --> browseFaculty
-Faculty --> map
-Faculty --> directions
-Faculty --> notif
-Faculty --> search
+' Faculty use cases
+F --> UC1
+F --> UC2
+F --> UC3
+F --> UC4
+F --> UC5
+F --> UC6
+F --> UC7
+F --> UC8
+
+' Extend relationships
+UC7 .> UC2 : <<extend>>
+UC8 .> UC2 : <<extend>>
 
 @enduml
 ```
 
 **User Roles:**
-- **Student**: View events, browse faculty, use map, search
-- **Faculty**: All student features + create/manage events
+- **Student**: Login, View Events, Browse Faculty, Campus Map, Search, Notifications
+- **Faculty**: All student features + Create Event, Manage Events
 
 ---
 
