@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
@@ -55,8 +55,8 @@ class ImageUploadService {
         uiSettings: [
           AndroidUiSettings(
             toolbarTitle: 'Crop Image',
-            toolbarColor: const Color(0xFF1976D2),
-            toolbarWidgetColor: const Color(0xFFFFFFFF),
+            toolbarColor: Color(0xFF1976D2),
+            toolbarWidgetColor: Color(0xFFFFFFFF),
             initAspectRatio: CropAspectRatioPreset.square,
             lockAspectRatio: true,
             aspectRatioPresets: [
