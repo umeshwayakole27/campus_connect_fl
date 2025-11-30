@@ -1,564 +1,422 @@
 # Campus Connect - UML Diagrams
 
-Professional UML diagrams representing the Campus Connect mobile application architecture.
+Simple and clean UML diagrams for the Campus Connect mobile application.
 
 ---
 
 ## 1. Class Diagram
 
-**Purpose:** Shows the main classes and their relationships in the system.
+**Purpose:** Core classes and their relationships.
 
 ```plantuml
 @startuml
-title Class Diagram - Campus Connect System
+title Class Diagram - Campus Connect
 
 ' Models
 class AppUser {
-  - id : String
-  - email : String
-  - name : String
-  - role : String
-  - profilePic : String?
-  - department : String?
-  - office : String?
-  - officeHours : String?
-  - createdAt : DateTime?
-  - updatedAt : DateTime?
+  + id : String
+  + email : String
+  + name : String
+  + role : String
   + isStudent() : bool
   + isFaculty() : bool
-  + copyWith() : AppUser
-  + toJson() : Map
-  + fromJson() : AppUser
 }
 
 class Event {
-  - id : String
-  - title : String
-  - description : String?
-  - location : String?
-  - locationId : String?
-  - time : DateTime
-  - createdBy : String?
-  - createdAt : DateTime?
-  - updatedAt : DateTime?
-  + copyWith() : Event
-  + toJson() : Map
-  + fromJson() : Event
+  + id : String
+  + title : String
+  + location : String
+  + time : DateTime
+  + createdBy : String
 }
 
 class Faculty {
-  - id : String
-  - userId : String
-  - department : String
-  - designation : String?
-  - officeLocation : String?
-  - officeHours : String?
-  - phone : String?
-  - researchInterests : List<String>?
-  - user : Map?
-  + userName : String?
-  + userEmail : String?
-  + copyWith() : Faculty
+  + userId : String
+  + department : String
+  + officeLocation : String
+  + phone : String
 }
 
 class CampusLocation {
-  - id : String
-  - name : String
-  - buildingCode : String?
-  - lat : double
-  - lng : double
-  - description : String?
-  - createdAt : DateTime?
-  + copyWith() : CampusLocation
-}
-
-class AppNotification {
-  - id : String
-  - userId : String?
-  - eventId : String?
-  - type : String
-  - title : String?
-  - message : String
-  - sentAt : DateTime
-  - read : bool
-  + copyWith() : AppNotification
+  + name : String
+  + lat : double
+  + lng : double
 }
 
 ' Repositories
 class AuthRepository {
-  - _supabaseService : SupabaseService
-  + signUp() : Future<AppUser?>
-  + signIn() : Future<AppUser?>
-  + signOut() : Future<void>
-  + getUserProfile() : Future<AppUser?>
-  + updateProfile() : Future<AppUser?>
-  + isAuthenticated() : bool
-  + authStateChanges() : Stream
+  + signIn()
+  + signUp()
+  + signOut()
 }
 
 class EventRepository {
-  - _client : SupabaseClient
-  - _cachedEvents : List<Event>?
-  + getAllEvents() : Future<List<Event>>
-  + getEventsByDateRange() : Future<List<Event>>
-  + createEvent() : Future<Event>
-  + updateEvent() : Future<Event>
-  + deleteEvent() : Future<void>
-}
-
-class FacultyRepository {
-  - _client : SupabaseClient
-  + getAllFaculty() : Future<List<Faculty>>
-  + getFacultyById() : Future<Faculty?>
-  + updateFaculty() : Future<Faculty>
-  + searchFaculty() : Future<List<Faculty>>
-}
-
-class LocationRepository {
-  - _client : SupabaseClient
-  + getAllLocations() : Future<List<CampusLocation>>
-  + getLocationById() : Future<CampusLocation?>
-  + searchLocations() : Future<List<CampusLocation>>
-}
-
-class NotificationRepository {
-  - _client : SupabaseClient
-  + getUserNotifications() : Future<List<AppNotification>>
-  + markAsRead() : Future<void>
-  + sendNotification() : Future<void>
+  + getAllEvents()
+  + createEvent()
+  + updateEvent()
 }
 
 ' Providers
 class AuthProvider {
-  - _authRepository : AuthRepository
-  - _currentUser : AppUser?
-  - _isLoading : bool
-  - _errorMessage : String?
-  + currentUser : AppUser?
+  + currentUser : AppUser
   + isAuthenticated : bool
-  + isStudent : bool
-  + isFaculty : bool
-  + signIn() : Future<void>
-  + signUp() : Future<void>
-  + signOut() : Future<void>
-  + updateProfile() : Future<void>
+  + signIn()
+  + signOut()
 }
 
 class EventProvider {
-  - _eventRepository : EventRepository
-  - _events : List<Event>
-  - _isLoading : bool
   + events : List<Event>
-  + loadEvents() : Future<void>
-  + createEvent() : Future<void>
-  + updateEvent() : Future<void>
-  + deleteEvent() : Future<void>
-}
-
-class FacultyProvider {
-  - _facultyRepository : FacultyRepository
-  - _facultyList : List<Faculty>
-  - _isLoading : bool
-  + facultyList : List<Faculty>
-  + loadFaculty() : Future<void>
-  + updateFaculty() : Future<void>
-  + searchFaculty() : Future<void>
-}
-
-class NotificationProvider {
-  - _notificationRepository : NotificationRepository
-  - _notifications : List<AppNotification>
-  - _unreadCount : int
-  + notifications : List<AppNotification>
-  + unreadCount : int
-  + loadNotifications() : Future<void>
-  + markAsRead() : Future<void>
+  + loadEvents()
+  + createEvent()
 }
 
 ' Services
 class SupabaseService {
-  - _client : SupabaseClient?
-  - _isInitialized : bool
-  + {static} instance : SupabaseService
-  + client : SupabaseClient
-  + initialize() : Future<void>
+  + client
+  + initialize()
 }
 
-class ImageUploadService {
-  - _client : SupabaseClient
-  + uploadProfilePicture() : Future<String>
-  + uploadEventImage() : Future<String>
-  + deleteImage() : Future<void>
-}
+' Relationships
+AppUser "1" -- "0..1" Faculty
+Event "*" --> "1" AppUser
+Event "*" --> "0..1" CampusLocation
 
-class DirectionsService {
-  + getDirections() : Future<Directions>
-  + decodePolyline() : List<LatLng>
-}
+AuthProvider --> AuthRepository
+EventProvider --> EventRepository
 
-class StorageService {
-  + {static} instance : StorageService
-  + saveValue() : Future<void>
-  + getValue() : Future<String?>
-  + deleteValue() : Future<void>
-}
-
-' Relationships - Models
-AppUser "1" -- "0..1" Faculty : has profile >
-Event "*" --> "1" AppUser : created by >
-Event "*" --> "0..1" CampusLocation : located at >
-AppNotification "*" --> "1" AppUser : sent to >
-AppNotification "*" --> "0..1" Event : about >
-
-' Relationships - Providers to Repositories
-AuthProvider --> AuthRepository : uses >
-EventProvider --> EventRepository : uses >
-FacultyProvider --> FacultyRepository : uses >
-NotificationProvider --> NotificationRepository : uses >
-
-' Relationships - Repositories to Services
-AuthRepository ..> SupabaseService : depends on >
-EventRepository ..> SupabaseService : depends on >
-FacultyRepository ..> SupabaseService : depends on >
-LocationRepository ..> SupabaseService : depends on >
-NotificationRepository ..> SupabaseService : depends on >
-
-' Relationships - Services
-ImageUploadService ..> SupabaseService : depends on >
+AuthRepository ..> SupabaseService
+EventRepository ..> SupabaseService
 
 @enduml
 ```
-
-**Key Components:**
-- **Models** (`lib/core/models/`): Data structures - AppUser, Event, Faculty, CampusLocation, AppNotification
-- **Repositories** (`lib/features/*/data/`): Database operations and business logic
-- **Providers** (`lib/core/providers/` & `lib/features/*/presentation/`): State management using Provider pattern
-- **Services** (`lib/core/services/`): External integrations (Supabase, Storage, Image Upload, Directions)
-
-**Relationships:**
-- `-->` Association/Uses
-- `--` Direct relationship
-- `..>` Dependency
 
 ---
 
 ## 2. Use Case Diagram
 
-**Purpose:** Shows what users can do with the system.
+**Purpose:** What users can do in the system.
 
 ```plantuml
 @startuml
-title Use Case Diagram - Campus Connect System
-left to right direction
+title Use Case Diagram - Campus Connect
 
 actor Student
 actor Faculty
-actor "Supabase\nBackend" as Backend
 
 rectangle "Campus Connect" {
-  
-  ' Authentication
-  package "Authentication" {
-    (Login) as login
-    (Register) as register
-    (Edit Profile) as editProfile
-    (Upload Profile Picture) as uploadPic
-  }
-  
-  ' Events
-  package "Events" {
-    (View Events) as viewEvents
-    (View Event Details) as eventDetails
-    (Create Event) as createEvent
-    (Edit Event) as editEvent
-    (Delete Event) as deleteEvent
-    (Open Event Location in Maps) as eventMaps
-  }
-  
-  ' Faculty
-  package "Faculty Directory" {
-    (Browse Faculty) as browseFaculty
-    (View Faculty Details) as facultyDetails
-    (Search Faculty) as searchFaculty
-    (Navigate to Office) as navigateOffice
-    (Contact Faculty) as contactFaculty
-  }
-  
-  ' Map
-  package "Campus Map" {
-    (View Campus Map) as viewMap
-    (Get Directions) as getDirections
-    (View My Location) as myLocation
-    (Search Locations) as searchLocations
-  }
-  
-  ' Notifications
-  package "Notifications" {
-    (View Notifications) as viewNotifications
-    (Receive Push Notifications) as pushNotif
-    (Mark as Read) as markRead
-  }
-  
-  ' Search
-  package "Search" {
-    (Global Search) as globalSearch
-    (Search Events) as searchEvents
-    (Search History) as searchHistory
-  }
+  (Login) as login
+  (View Events) as viewEvents
+  (Create Event) as createEvent
+  (Browse Faculty) as browseFaculty
+  (Campus Map) as map
+  (Get Directions) as directions
+  (Notifications) as notif
+  (Search) as search
 }
 
-' Student use cases
 Student --> login
-Student --> register
-Student --> editProfile
-Student --> uploadPic
 Student --> viewEvents
-Student --> eventDetails
-Student --> eventMaps
 Student --> browseFaculty
-Student --> facultyDetails
-Student --> searchFaculty
-Student --> navigateOffice
-Student --> contactFaculty
-Student --> viewMap
-Student --> getDirections
-Student --> myLocation
-Student --> searchLocations
-Student --> viewNotifications
-Student --> pushNotif
-Student --> markRead
-Student --> globalSearch
-Student --> searchEvents
-Student --> searchHistory
+Student --> map
+Student --> directions
+Student --> notif
+Student --> search
 
-' Faculty use cases (includes all Student capabilities)
 Faculty --> login
-Faculty --> register
-Faculty --> editProfile
-Faculty --> uploadPic
 Faculty --> viewEvents
-Faculty --> eventDetails
 Faculty --> createEvent
-Faculty --> editEvent
-Faculty --> deleteEvent
-Faculty --> eventMaps
 Faculty --> browseFaculty
-Faculty --> facultyDetails
-Faculty --> searchFaculty
-Faculty --> navigateOffice
-Faculty --> contactFaculty
-Faculty --> viewMap
-Faculty --> getDirections
-Faculty --> myLocation
-Faculty --> searchLocations
-Faculty --> viewNotifications
-Faculty --> pushNotif
-Faculty --> markRead
-Faculty --> globalSearch
-Faculty --> searchEvents
-Faculty --> searchHistory
-
-' Backend interactions
-login ..> Backend : authenticate
-register ..> Backend : create user
-editProfile ..> Backend : update
-uploadPic ..> Backend : store
-viewEvents ..> Backend : fetch
-createEvent ..> Backend : create
-editEvent ..> Backend : update
-deleteEvent ..> Backend : remove
-browseFaculty ..> Backend : fetch
-viewMap ..> Backend : fetch locations
-viewNotifications ..> Backend : fetch
-pushNotif ..> Backend : FCM
-globalSearch ..> Backend : query
+Faculty --> map
+Faculty --> directions
+Faculty --> notif
+Faculty --> search
 
 @enduml
 ```
 
-**Main Features:**
-- **Authentication**: Login, Register, Edit Profile, Upload Profile Picture
-- **Events**: View, Create (Faculty), Edit (Faculty), Delete (Faculty), Open in Maps
-- **Faculty Directory**: Browse, Search, View Details, Navigate to Office, Contact
-- **Campus Map**: Interactive map, Directions, My Location, Search Locations
-- **Notifications**: View, Push Notifications (FCM), Mark as Read
-- **Search**: Global Search across Events, Faculty, and Locations
+**User Roles:**
+- **Student**: View events, browse faculty, use map, search
+- **Faculty**: All student features + create/manage events
 
 ---
 
-## 3. Activity Diagram - Login Flow
+## 3. ER Diagram
 
-**Purpose:** Shows the steps when a user logs in.
+**Purpose:** Database structure and relationships.
+
+```plantuml
+@startuml
+title ER Diagram - Campus Connect Database
+
+entity "users" as users {
+  * id : UUID
+  --
+  * email : TEXT
+  * name : TEXT
+  * role : TEXT
+  profile_pic : TEXT
+}
+
+entity "faculty" as faculty {
+  * id : UUID
+  --
+  * user_id : UUID <<FK>>
+  * department : TEXT
+  office_location : TEXT
+  phone : TEXT
+}
+
+entity "events" as events {
+  * id : UUID
+  --
+  * title : TEXT
+  * time : TIMESTAMP
+  location : TEXT
+  location_id : UUID <<FK>>
+  created_by : UUID <<FK>>
+}
+
+entity "campus_locations" as locations {
+  * id : UUID
+  --
+  * name : TEXT
+  * lat : DOUBLE
+  * lng : DOUBLE
+}
+
+entity "notifications" as notifications {
+  * id : UUID
+  --
+  user_id : UUID <<FK>>
+  event_id : UUID <<FK>>
+  * message : TEXT
+  read : BOOLEAN
+}
+
+users ||--o| faculty
+users ||--o{ events
+users ||--o{ notifications
+locations ||--o{ events
+events ||--o{ notifications
+
+@enduml
+```
+
+**Tables:**
+- **users**: All user accounts
+- **faculty**: Faculty profile details
+- **events**: Campus events
+- **campus_locations**: Buildings with GPS coordinates
+- **notifications**: Push notifications
+
+---
+
+## 4. Sequence Diagram - Login Flow
+
+**Purpose:** User authentication process.
 
 ```plantuml
 @startuml
 title Login Flow
 
-start
+actor User
+participant UI
+participant AuthProvider
+participant AuthRepository
+participant Supabase
+database Database
 
-:User opens Login Screen;
-
-:Enter email and password;
-
-if (Valid input?) then (yes)
-  :Send to AuthProvider;
-  
-  :AuthRepository checks with Supabase;
-  
-  if (Correct credentials?) then (yes)
-    :Get user profile from database;
-    
-    :Save session locally;
-    
-    :Update app state;
-    
-    :Go to Home Screen;
-    
-    stop
-    
-  else (no)
-    :Show error: Invalid credentials;
-    stop
-  endif
-  
-else (no)
-  :Show error: Please fill all fields;
-  stop
-endif
+User -> UI : Enter credentials
+UI -> AuthProvider : signIn()
+AuthProvider -> AuthRepository : signIn()
+AuthRepository -> Supabase : authenticate
+Supabase -> Database : verify credentials
+Database --> Supabase : user data
+Supabase --> AuthRepository : session
+AuthRepository --> AuthProvider : user profile
+AuthProvider --> UI : success
+UI --> User : Navigate to Home
 
 @enduml
 ```
-
-**Simple Steps:**
-1. User opens login screen and enters email/password
-2. App validates the input
-3. Sends credentials to backend (Supabase)
-4. If correct: Get user info, save session, go to home
-5. If wrong: Show error message
 
 ---
 
-## 4. Activity Diagram - Create Event Flow
+## 5. Sequence Diagram - Create Event Flow
 
-**Purpose:** Shows how faculty members create events.
+**Purpose:** Faculty creates a new event.
 
 ```plantuml
 @startuml
-title Create Event Flow (Faculty Only)
+title Create Event Flow
 
-start
+actor Faculty
+participant UI
+participant EventProvider
+participant EventRepository
+participant Supabase
+participant FCM
 
-:Faculty opens Events Screen;
-
-:Click "Create Event" button;
-
-:Fill in event details\n(Title, Location, Date, Time);
-
-if (All fields filled?) then (yes)
-  if (User is Faculty?) then (yes)
-    :EventProvider creates event;
-    
-    :Save to database via EventRepository;
-    
-    if (Save successful?) then (yes)
-      :Update events list;
-      
-      :Send notifications to users;
-      
-      :Show success message;
-      
-      :Return to Events Screen;
-      
-      stop
-      
-    else (no)
-      :Show error: Could not save;
-      stop
-    endif
-    
-  else (no - student)
-    :Show error: Only faculty can create events;
-    stop
-  endif
-  
-else (no)
-  :Show error: Please fill all required fields;
-  stop
-endif
+Faculty -> UI : Fill event details
+UI -> EventProvider : createEvent()
+EventProvider -> EventRepository : createEvent()
+EventRepository -> Supabase : insert event
+Supabase --> EventRepository : event created
+EventRepository --> EventProvider : success
+EventProvider -> FCM : send push notifications
+FCM --> EventProvider : notifications sent
+EventProvider --> UI : update list
+UI --> Faculty : Show success
 
 @enduml
 ```
 
-**Simple Steps:**
-1. Faculty opens Events Screen and clicks "Create Event"
-2. Fills in event details (title, location, date, time)
-3. App checks if user is faculty
-4. Saves event to database
-5. Sends notifications to all users
-6. Shows success message and updates list
+---
+
+## 6. Activity Diagram - Search Flow
+
+**Purpose:** Global search workflow.
+
+```plantuml
+@startuml
+title Global Search Flow
+
+start
+
+:Enter search query;
+
+if (Query >= 2 chars?) then (yes)
+  fork
+    :Search Events;
+  fork again
+    :Search Faculty;
+  fork again
+    :Search Locations;
+  end fork
+  
+  :Combine results;
+  
+  if (Results found?) then (yes)
+    :Display results;
+    :User selects item;
+    :Navigate to details;
+  else (no)
+    :Show "No results";
+  endif
+else (no)
+  :Show search history;
+endif
+
+stop
+
+@enduml
+```
+
+---
+
+## 7. Component Diagram - Architecture
+
+**Purpose:** System architecture overview.
+
+```plantuml
+@startuml
+title System Architecture
+
+package "UI Layer" {
+  [Screens]
+}
+
+package "State Management" {
+  [Providers]
+}
+
+package "Business Logic" {
+  [Repositories]
+}
+
+package "Services" {
+  [Supabase]
+  [Firebase FCM]
+  [Google Maps]
+}
+
+database "PostgreSQL" as DB
+
+[Screens] --> [Providers]
+[Providers] --> [Repositories]
+[Repositories] --> [Supabase]
+[Repositories] --> [Firebase FCM]
+[Screens] --> [Google Maps]
+[Supabase] --> DB
+
+@enduml
+```
+
+**Layers:**
+- **UI Layer**: Flutter screens and widgets
+- **State Management**: Provider pattern
+- **Business Logic**: Repositories for data operations
+- **Services**: External integrations (Supabase, Firebase, Google Maps)
 
 ---
 
 ## Quick Reference
 
-### Class Diagram
-Shows the main building blocks:
-- **Models**: Data structures (User, Event, Faculty)
-- **Repositories**: Database operations
-- **Providers**: State management
-- **Services**: External services (Supabase)
+### Key Diagrams
 
-### Use Case Diagram
-Shows what users can do:
-- **Student**: Can view events, browse faculty, use campus map
-- **Faculty**: Can do everything student can + create/manage events
+1. **Class Diagram**: Core classes (Models, Repositories, Providers, Services)
+2. **Use Case Diagram**: Student and Faculty capabilities
+3. **ER Diagram**: Database structure (5 main tables)
+4. **Sequence - Login**: Authentication flow
+5. **Sequence - Create Event**: Event creation with notifications
+6. **Activity - Search**: Global search workflow
+7. **Component Diagram**: Layered architecture
 
-### Activity Diagrams
-Shows step-by-step flows:
-- **Login**: How users sign into the app
-- **Create Event**: How faculty members create events
+### Technology Stack
+
+- **Frontend**: Flutter 3.19+ with Provider
+- **Backend**: Supabase (PostgreSQL)
+- **Push Notifications**: Firebase Cloud Messaging
+- **Maps**: Google Maps API
+- **Security**: Row Level Security (RLS)
 
 ---
 
-## How to View These Diagrams
+## How to View Diagrams
 
 **Online (Easiest):**
-1. Go to: http://www.plantuml.com/plantuml/uml/
-2. Copy any diagram code (from `@startuml` to `@enduml`)
-3. Paste and view instantly!
+1. Visit: http://www.plantuml.com/plantuml/uml/
+2. Copy diagram code (from `@startuml` to `@enduml`)
+3. Paste and view
 
 **VS Code:**
 1. Install "PlantUML" extension
 2. Open this file
-3. Preview diagrams directly
+3. Press `Alt + D` to preview
 
 ---
 
-## Symbol Guide
+## Diagram Symbols
 
-**Class Diagrams:**
-- `-->` One class uses another
-- `--` Simple connection
-- `..>` Creates or depends on
-- `*` means many (e.g., `*` events)
-
-**Use Case Diagrams:**
-- Ovals = Things users can do
-- Stick figures = Users (Student, Faculty)
-- `..>` = Connects to backend
-
-**Activity Diagrams:**
-- Rectangles = Actions/Steps
-- Diamonds = Yes/No decisions
-- Start = Filled circle
-- End = Circle with border
+- `-->` Uses/Depends on
+- `--` Association
+- `..>` Creates/Dependency
+- `*` Many (e.g., one-to-many)
+- `<<FK>>` Foreign Key
+- `||--o{` One-to-many relationship
 
 ---
 
-## IEEE Standard Compliance
+## Architecture Patterns
 
-✅ Follows IEEE 1016-2009 (Software Design)
-✅ Follows UML 2.5 Standard
-✅ Simple, clear, and professional
-✅ All elements map to actual code files
+**Clean Architecture**: UI → Providers → Repositories → Services
+**Repository Pattern**: Centralized data access
+**Provider Pattern**: Reactive state management
+**Singleton**: Services (Supabase, Storage)
+
+---
+
+**Last Updated**: 2025-11-30  
+**Version**: 2.0  
+**Campus Connect Development Team**
 

@@ -62,6 +62,9 @@ class ImageUploadService {
             aspectRatioPresets: [
               CropAspectRatioPreset.square,
             ],
+            hideBottomControls: false,
+            statusBarColor: Color(0xFF1976D2),
+            activeControlsWidgetColor: Color(0xFF1976D2),
           ),
           IOSUiSettings(
             title: 'Crop Image',
@@ -86,21 +89,23 @@ class ImageUploadService {
   /// Compress the image
   Future<File?> compressImage({
     required File imageFile,
-    int quality = 80,
-    int maxSizeKB = 500,
+    int quality = 70,
+    int maxSizeKB = 300,
   }) async {
     try {
       final String targetPath = imageFile.path.replaceAll(
         path.extension(imageFile.path),
-        '_compressed${path.extension(imageFile.path)}',
+        '_compressed.jpg',
       );
 
+      // More aggressive compression for faster uploads
       final XFile? compressedFile = await FlutterImageCompress.compressAndGetFile(
         imageFile.absolute.path,
         targetPath,
         quality: quality,
-        minWidth: 1024,
-        minHeight: 1024,
+        minWidth: 800,
+        minHeight: 800,
+        format: CompressFormat.jpeg, // Always use JPEG for smaller size
       );
 
       if (compressedFile == null) {
@@ -111,15 +116,16 @@ class ImageUploadService {
 
       // Check file size and reduce quality if still too large
       final int fileSizeKB = await compressed.length() ~/ 1024;
-      if (fileSizeKB > maxSizeKB && quality > 50) {
+      if (fileSizeKB > maxSizeKB && quality > 40) {
         AppLogger.logInfo('Image still large ($fileSizeKB KB), compressing further...');
         return await compressImage(
           imageFile: imageFile,
-          quality: quality - 20,
+          quality: quality - 15,
           maxSizeKB: maxSizeKB,
         );
       }
 
+      AppLogger.logInfo('✅ Image compressed: ${fileSizeKB}KB (quality: $quality)');
       return compressed;
     } catch (e) {
       AppLogger.logError('Failed to compress image', error: e);
