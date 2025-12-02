@@ -42,10 +42,20 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
 
       // Listen to auth state changes
-      _authRepository.authStateChanges().listen((authState) {
+      _authRepository.authStateChanges().listen((authState) async {
         if (authState.session == null) {
-          _currentUser = null;
-          notifyListeners();
+          // User logged out
+          if (_currentUser != null) {
+            _currentUser = null;
+            notifyListeners();
+          }
+        } else {
+          // User logged in or session refreshed
+          final userId = authState.session!.user.id;
+          if (_currentUser == null || _currentUser!.id != userId) {
+            _currentUser = await _authRepository.getUserProfile(userId);
+            notifyListeners();
+          }
         }
       });
     } catch (e) {
@@ -104,8 +114,9 @@ class AuthProvider extends ChangeNotifier {
     required String email,
     required String password,
   }) async {
-    _setLoading(true);
+    _isLoading = true;
     _clearError();
+    notifyListeners();
 
     try {
       final user = await _authRepository.signIn(
@@ -116,16 +127,19 @@ class AuthProvider extends ChangeNotifier {
       if (user != null) {
         _currentUser = user;
         await _saveUserData(user);
-        _setLoading(false);
+        _isLoading = false;
         notifyListeners();
         return true;
       }
 
-      _setLoading(false);
+      _setError('Login failed. Please check your credentials.');
+      _isLoading = false;
+      notifyListeners();
       return false;
     } catch (e) {
       _setError(e.toString());
-      _setLoading(false);
+      _isLoading = false;
+      notifyListeners();
       return false;
     }
   }
@@ -215,6 +229,12 @@ class AuthProvider extends ChangeNotifier {
 
   void _clearError() {
     _errorMessage = null;
+  }
+  
+  // Public method to clear errors
+  void clearError() {
+    _clearError();
+    notifyListeners();
   }
 
   Future<void> _saveUserData(AppUser user) async {

@@ -71,6 +71,27 @@ android {
             
             // Signing with debug keys for now
             signingConfig = signingConfigs.getByName("debug")
+            
+            // Additional size optimizations
+            ndk {
+                debugSymbolLevel = "NONE"
+            }
+        }
+    }
+    
+    // Exclude unnecessary native libraries
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = false
+        }
+        resources {
+            excludes += listOf(
+                "META-INF/LICENSE*",
+                "META-INF/NOTICE*",
+                "META-INF/*.kotlin_module",
+                "kotlin/**",
+                "META-INF/versions/**"
+            )
         }
     }
 

@@ -78,6 +78,7 @@ class FacultyDetailScreen extends StatelessWidget {
                     faculty.userName ?? 'Unknown',
                     style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.onSurface,
                     ),
                     textAlign: TextAlign.center,
                   ),

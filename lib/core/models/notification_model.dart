@@ -5,51 +5,86 @@ part 'notification_model.g.dart';
 
 @JsonSerializable()
 class AppNotification extends Equatable {
+  @JsonKey(name: 'notification_id', fromJson: _idFromJson)
   final String id;
   @JsonKey(name: 'user_id')
   final String? userId;
-  @JsonKey(name: 'event_id')
-  final String? eventId;
-  final String type;
+  @JsonKey(name: 'data')
+  final Map<String, dynamic>? eventData;
+  @JsonKey(name: 'notification_type')
+  final String? type;
   final String? title;
-  final String message;
-  @JsonKey(name: 'sent_at')
-  final DateTime sentAt;
+  final String? message;
+  // Support both created_at and sent_at for backward compatibility
+  @JsonKey(name: 'created_at', defaultValue: null)
+  final DateTime? createdAt;
+  @JsonKey(name: 'sent_at', defaultValue: null)
+  final DateTime? sentAtOld;
+  @JsonKey(name: 'is_read', defaultValue: false)
   final bool read;
+  
+  // Convert int or String to String for id
+  static String _idFromJson(dynamic value) {
+    if (value == null) return '';
+    return value.toString();
+  }
+  
+  // Helper getter for event_id from data JSON
+  String? get eventId => eventData?['event_id'] as String?;
+  
+  // Use created_at if available, otherwise fall back to sent_at
+  DateTime get sentAt => createdAt ?? sentAtOld ?? DateTime.now();
 
   const AppNotification({
     required this.id,
     this.userId,
-    this.eventId,
-    required this.type,
+    this.eventData,
+    this.type,
     this.title,
-    required this.message,
-    required this.sentAt,
+    this.message,
+    this.createdAt,
+    this.sentAtOld,
     this.read = false,
   });
 
-  factory AppNotification.fromJson(Map<String, dynamic> json) => 
-      _$AppNotificationFromJson(json);
+  factory AppNotification.fromJson(Map<String, dynamic> json) {
+    try {
+      return _$AppNotificationFromJson(json);
+    } catch (e) {
+      // If parsing fails, create a minimal valid object
+      return AppNotification(
+        id: json['notification_id']?.toString() ?? json['id']?.toString() ?? '',
+        userId: json['user_id']?.toString(),
+        type: json['notification_type']?.toString() ?? json['type']?.toString() ?? 'system',
+        message: json['message']?.toString() ?? 'Notification',
+        title: json['title']?.toString(),
+        read: json['is_read'] == true || json['read'] == true,
+      );
+    }
+  }
+  
   Map<String, dynamic> toJson() => _$AppNotificationToJson(this);
 
   AppNotification copyWith({
     String? id,
     String? userId,
-    String? eventId,
+    Map<String, dynamic>? eventData,
     String? type,
     String? title,
     String? message,
-    DateTime? sentAt,
+    DateTime? createdAt,
+    DateTime? sentAtOld,
     bool? read,
   }) {
     return AppNotification(
       id: id ?? this.id,
       userId: userId ?? this.userId,
-      eventId: eventId ?? this.eventId,
+      eventData: eventData ?? this.eventData,
       type: type ?? this.type,
       title: title ?? this.title,
       message: message ?? this.message,
-      sentAt: sentAt ?? this.sentAt,
+      createdAt: createdAt ?? this.createdAt,
+      sentAtOld: sentAtOld ?? this.sentAtOld,
       read: read ?? this.read,
     );
   }
@@ -58,11 +93,12 @@ class AppNotification extends Equatable {
   List<Object?> get props => [
     id,
     userId,
-    eventId,
+    eventData,
     type,
     title,
     message,
-    sentAt,
+    createdAt,
+    sentAtOld,
     read,
   ];
 }

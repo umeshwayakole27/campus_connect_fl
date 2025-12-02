@@ -8,6 +8,7 @@ import '../../../core/theme.dart';
 import '../../../core/utils.dart';
 import '../../../core/services/image_upload_service.dart';
 import 'edit_profile_screen.dart';
+import 'login_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -195,10 +196,19 @@ class ProfileScreen extends StatelessWidget {
 
                       if (confirmed && context.mounted) {
                         await context.read<AuthProvider>().signOut();
-                        AppUtils.showSnackBar(
-                          context,
-                          AppConstants.successLogout,
-                        );
+                        
+                        if (context.mounted) {
+                          // Navigate to login screen and remove all previous routes
+                          Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(builder: (context) => const LoginScreen()),
+                            (route) => false,
+                          );
+                          
+                          AppUtils.showSnackBar(
+                            context,
+                            AppConstants.successLogout,
+                          );
+                        }
                       }
                     },
                     icon: const Icon(Icons.logout),
@@ -248,22 +258,24 @@ class ProfileScreen extends StatelessWidget {
   }
 
   void _showImageSourceDialog(BuildContext context, AuthProvider authProvider) {
+    final theme = Theme.of(context);
     showModalBottomSheet(
       context: context,
+      backgroundColor: theme.colorScheme.surface,
       builder: (context) => SafeArea(
         child: Wrap(
           children: [
             ListTile(
-              leading: const Icon(Icons.photo_camera),
-              title: const Text('Take Photo'),
+              leading: Icon(Icons.photo_camera, color: theme.colorScheme.primary),
+              title: Text('Take Photo', style: TextStyle(color: theme.colorScheme.onSurface)),
               onTap: () {
                 Navigator.pop(context);
                 _uploadProfilePicture(context, authProvider, ImageSource.camera);
               },
             ),
             ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text('Choose from Gallery'),
+              leading: Icon(Icons.photo_library, color: theme.colorScheme.primary),
+              title: Text('Choose from Gallery', style: TextStyle(color: theme.colorScheme.onSurface)),
               onTap: () {
                 Navigator.pop(context);
                 _uploadProfilePicture(context, authProvider, ImageSource.gallery);

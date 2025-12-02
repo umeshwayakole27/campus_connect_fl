@@ -28,6 +28,15 @@
 -keep class * implements com.google.gson.JsonSerializer
 -keep class * implements com.google.gson.JsonDeserializer
 
+# Keep generic signature of TypeToken (CRITICAL for notifications)
+-keep class com.google.gson.reflect.TypeToken { *; }
+-keep class * extends com.google.gson.reflect.TypeToken
+
+# Flutter Local Notifications
+-keep class com.dexterous.** { *; }
+-keep class androidx.core.app.NotificationCompat** { *; }
+-keep class androidx.core.app.NotificationManagerCompat { *; }
+
 # Keep data models (adjust package name if needed)
 -keep class com.campus_connect.geca.** { *; }
 
@@ -42,11 +51,28 @@
   @com.google.gson.annotations.SerializedName <fields>;
 }
 
-# Preserve line numbers for debugging
--keepattributes SourceFile,LineNumberTable
--renamesourcefileattribute SourceFile
-
 # Don't warn about missing Play Core classes (for deferred components)
 -dontwarn com.google.android.play.core.splitcompat.SplitCompatApplication
 -dontwarn com.google.android.play.core.splitinstall.**
 -dontwarn com.google.android.play.core.tasks.**
+
+# Remove logging in release
+-assumenosideeffects class android.util.Log {
+    public static *** d(...);
+    public static *** v(...);
+    public static *** i(...);
+}
+
+# Optimization flags
+-optimizationpasses 5
+-dontusemixedcaseclassnames
+-dontskipnonpubliclibraryclasses
+-verbose
+-allowaccessmodification
+-repackageclasses ''
+
+# Remove unused code
+-assumenosideeffects class kotlin.jvm.internal.Intrinsics {
+    public static void check*(...);
+    public static void throw*(...);
+}

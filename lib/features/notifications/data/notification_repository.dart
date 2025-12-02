@@ -9,11 +9,23 @@ class NotificationRepository {
   // Get notifications for user
   Future<List<AppNotification>> getNotifications(String userId) async {
     try {
-      final response = await _supabase
-          .from('notifications')
-          .select()
-          .eq('user_id', userId)
-          .order('sent_at', ascending: false);
+      // Try with created_at first, fallback to sent_at for backward compatibility
+      dynamic response;
+      try {
+        response = await _supabase
+            .from('notifications')
+            .select()
+            .eq('user_id', userId)
+            .order('created_at', ascending: false);
+      } catch (e) {
+        // If created_at doesn't exist, try sent_at
+        debugPrint('Trying sent_at column: $e');
+        response = await _supabase
+            .from('notifications')
+            .select()
+            .eq('user_id', userId)
+            .order('sent_at', ascending: false);
+      }
 
       final notifications = (response as List)
           .map((json) => AppNotification.fromJson(json))
@@ -21,6 +33,7 @@ class NotificationRepository {
       
       return notifications;
     } catch (e) {
+      debugPrint('Error loading notifications: $e');
       throw Exception('Failed to load notifications: ${e.toString()}');
     }
   }
@@ -30,9 +43,9 @@ class NotificationRepository {
     try {
       final response = await _supabase
           .from('notifications')
-          .select('id')
+          .select('notification_id')
           .eq('user_id', userId)
-          .eq('read', false);
+          .eq('is_read', false);
 
       return (response as List).length;
     } catch (e) {
@@ -45,8 +58,8 @@ class NotificationRepository {
     try {
       await _supabase
           .from('notifications')
-          .update({'read': true})
-          .eq('id', notificationId);
+          .update({'is_read': true})
+          .eq('notification_id', notificationId);
     } catch (e) {
       debugPrint('Error marking notification as read: $e');
       throw Exception('Failed to update notification');
@@ -58,9 +71,9 @@ class NotificationRepository {
     try {
       await _supabase
           .from('notifications')
-          .update({'read': true})
+          .update({'is_read': true})
           .eq('user_id', userId)
-          .eq('read', false);
+          .eq('is_read', false);
     } catch (e) {
       debugPrint('Error marking all as read: $e');
       throw Exception('Failed to update notifications');
@@ -73,7 +86,7 @@ class NotificationRepository {
       await _supabase
           .from('notifications')
           .delete()
-          .eq('id', notificationId);
+          .eq('notification_id', notificationId);
     } catch (e) {
       debugPrint('Error deleting notification: $e');
       throw Exception('Failed to delete notification');
@@ -83,7 +96,7 @@ class NotificationRepository {
   // Create notification (for faculty)
   Future<AppNotification> createNotification({
     required String userId,
-    String? eventId,
+    Map<String, dynamic>? eventData,
     required String type,
     required String title,
     required String message,
@@ -93,8 +106,8 @@ class NotificationRepository {
           .from('notifications')
           .insert({
             'user_id': userId,
-            'event_id': eventId,
-            'type': type,
+            'data': eventData,
+            'notification_type': type,
             'title': title,
             'message': message,
           })
@@ -113,7 +126,7 @@ class NotificationRepository {
     required String type,
     required String title,
     required String message,
-    String? eventId,
+    Map<String, dynamic>? eventData,
   }) async {
     try {
       debugPrint('📢 Starting broadcast notification...');
@@ -145,6 +158,7 @@ class NotificationRepository {
       try {
         // Use the database function that bypasses RLS
         debugPrint('📢 Calling broadcast_notification_to_all_users RPC...');
+        debugPrint('📢 Parameters: type=$type, title=$title, event_id=${eventData?['event_id']}');
         
         final result = await _supabase.rpc(
           'broadcast_notification_to_all_users',
@@ -152,22 +166,30 @@ class NotificationRepository {
             'p_type': type,
             'p_title': title,
             'p_message': message,
-            'p_event_id': eventId,
+            'p_event_id': eventData?['event_id']?.toString(),
           },
         );
         
-        final notifications = result as List;
-        debugPrint('📢 ✅ Broadcast complete!');
-        debugPrint('📢 Push sent via FCM to all devices');
-        debugPrint('📢 History saved for ${notifications.length} users');
+        debugPrint('📢 RPC call completed! Result type: ${result.runtimeType}');
         
-        if (notifications.isNotEmpty) {
-          debugPrint('📢 Sample created notification: ${notifications.first}');
+        if (result != null) {
+          final notifications = result as List;
+          debugPrint('📢 ✅ Broadcast complete!');
+          debugPrint('📢 Push sent via FCM to all devices');
+          debugPrint('📢 History saved for ${notifications.length} users');
+          
+          if (notifications.isNotEmpty) {
+            debugPrint('📢 Sample created notification ID: ${notifications.first['notification_id']}');
+            debugPrint('📢 Sample notification: ${notifications.first}');
+          }
+        } else {
+          debugPrint('📢 ⚠️  RPC returned null');
         }
-      } catch (e) {
+      } catch (e, stackTrace) {
         debugPrint('❌ Error calling RPC function: $e');
-        debugPrint('⚠️  Make sure to run the migration: supabase/migrations/20251104_broadcast_notifications.sql');
-        throw Exception('Failed to broadcast notification history: $e');
+        debugPrint('❌ Stack trace: $stackTrace');
+        debugPrint('⚠️  Make sure the broadcast_notification_to_all_users function exists in Supabase');
+        // Don't throw - let the push notification part succeed even if DB save fails
       }
     } catch (e, stackTrace) {
       debugPrint('❌ Error broadcasting notification: $e');

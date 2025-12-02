@@ -43,6 +43,26 @@ class NotificationProvider extends ChangeNotifier {
     }
   }
 
+  // Save FCM token for the current user
+  Future<void> saveFCMToken(String userId) async {
+    try {
+      final token = _fcmService.fcmToken;
+      if (token != null) {
+        // Determine platform - use a simple check instead of debugDefaultTargetPlatformOverride
+        String platform = 'android'; // Default to android
+        // You can add platform detection logic here if needed
+        // For example, using dart:io to check Platform.isAndroid, Platform.isIOS
+        
+        await _repository.saveFCMToken(userId, token, platform);
+        debugPrint('✅ FCM token saved for user: $userId');
+      } else {
+        debugPrint('⚠️  FCM token is null, skipping save');
+      }
+    } catch (e) {
+      debugPrint('❌ Error saving FCM token: $e');
+    }
+  }
+
   // Load notifications
   Future<void> loadNotifications(String userId) async {
     debugPrint('NotificationProvider: Loading notifications for userId: $userId');
@@ -157,7 +177,7 @@ class NotificationProvider extends ChangeNotifier {
   // Create notification (for faculty)
   Future<void> createNotification({
     required String userId,
-    String? eventId,
+    Map<String, dynamic>? eventData,
     required String type,
     required String title,
     required String message,
@@ -165,7 +185,7 @@ class NotificationProvider extends ChangeNotifier {
     try {
       await _repository.createNotification(
         userId: userId,
-        eventId: eventId,
+        eventData: eventData,
         type: type,
         title: title,
         message: message,
@@ -181,7 +201,7 @@ class NotificationProvider extends ChangeNotifier {
     required String type,
     required String title,
     required String message,
-    String? eventId,
+    Map<String, dynamic>? eventData,
   }) async {
     debugPrint('📢 NotificationProvider: Broadcasting notification...');
     debugPrint('📢 Type: $type, Title: $title, Message: $message');
@@ -191,7 +211,7 @@ class NotificationProvider extends ChangeNotifier {
         type: type,
         title: title,
         message: message,
-        eventId: eventId,
+        eventData: eventData,
       );
       debugPrint('📢 NotificationProvider: Broadcast successful!');
     } catch (e, stackTrace) {

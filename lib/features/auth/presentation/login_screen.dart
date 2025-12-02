@@ -4,6 +4,7 @@ import '../../../core/constants.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../../../core/theme.dart';
 import '../../../core/utils.dart';
+import '../../../main.dart';
 import 'register_screen.dart';
 import 'forgot_password_screen.dart';
 
@@ -32,19 +33,28 @@ class _LoginScreenState extends State<LoginScreen> {
 
     final authProvider = context.read<AuthProvider>();
     
+    // Clear any previous errors
+    authProvider.clearError();
+    
     final success = await authProvider.signIn(
       email: _emailController.text.trim(),
       password: _passwordController.text,
     );
 
-    if (mounted) {
-      if (success) {
-        AppUtils.showSnackBar(context, AppConstants.successLogin);
-        // Navigation will be handled by auth state listener in main.dart
-      } else {
+    if (!mounted) return;
+
+    if (success && authProvider.isAuthenticated) {
+      // Navigate to home page explicitly
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const HomePage()),
+        (route) => false,
+      );
+    } else {
+      // Only show error if login failed
+      if (authProvider.errorMessage != null) {
         AppUtils.showSnackBar(
           context,
-          authProvider.errorMessage ?? 'Login failed',
+          authProvider.errorMessage!,
           isError: true,
         );
       }
@@ -90,6 +100,45 @@ class _LoginScreenState extends State<LoginScreen> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 48),
+                  
+                  // Error message display
+                  Consumer<AuthProvider>(
+                    builder: (context, authProvider, child) {
+                      if (authProvider.errorMessage != null && authProvider.errorMessage!.isNotEmpty) {
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.errorContainer,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: Theme.of(context).colorScheme.error,
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.error_outline,
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  authProvider.errorMessage!,
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.onErrorContainer,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  ),
                   
                   // Email field
                   TextFormField(

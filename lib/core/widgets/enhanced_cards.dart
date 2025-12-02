@@ -323,6 +323,7 @@ class _EnhancedFacultyCardState extends State<EnhancedFacultyCard>
                 widget.faculty.userName ?? 'Unknown',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
                 textAlign: TextAlign.center,
                 maxLines: 2,
@@ -392,6 +393,7 @@ class _EnhancedFacultyCardState extends State<EnhancedFacultyCard>
               widget.faculty.userName ?? 'Unknown',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

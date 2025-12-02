@@ -3,9 +3,14 @@ import 'package:intl/intl.dart';
 import '../../../core/models/event_model.dart';
 import '../data/event_repository.dart';
 import '../../notifications/services/fcm_service.dart';
+import '../../notifications/services/event_notification_service.dart';
+import '../../notifications/data/notification_repository.dart';
 
 class EventProvider with ChangeNotifier {
   final EventRepository _repository = EventRepository();
+  final EventNotificationService _notificationService = EventNotificationService();
+  final NotificationRepository _notificationRepository = NotificationRepository();
+  final FCMService _fcmService = FCMService();
 
   List<Event> _events = [];
   List<Event> get events => _events;
@@ -23,6 +28,12 @@ class EventProvider with ChangeNotifier {
   EventFilter _filter = EventFilter.all;
   EventFilter get filter => _filter;
 
+  /// Initialize event provider
+  Future<void> initialize() async {
+    await _notificationService.initialize();
+    await _notificationService.requestPermissions();
+  }
+
   /// Load all events
   Future<void> loadEvents() async {
     _isLoading = true;
@@ -30,7 +41,27 @@ class EventProvider with ChangeNotifier {
     notifyListeners();
 
     try {
+      final previousEventIds = _events.map((e) => e.id).toSet();
       _events = await _repository.getAllEvents();
+      
+      // Find new events that user hasn't seen before
+      final newEvents = _events.where((event) => 
+        !previousEventIds.contains(event.id) && 
+        event.time.isAfter(DateTime.now())
+      ).toList();
+      
+      if (newEvents.isNotEmpty) {
+        debugPrint('📢 Found ${newEvents.length} new events, scheduling local reminders...');
+        for (final event in newEvents) {
+          // Schedule local reminders for each new event
+          await _scheduleEventReminders(event);
+        }
+      }
+      
+      // Rehydrate pending notification schedules for all upcoming events
+      final upcomingEvents = _events.where((e) => e.time.isAfter(DateTime.now())).toList();
+      await _notificationService.rehydratePendingSchedules(upcomingEvents);
+      
       _isLoading = false;
       notifyListeners();
     } catch (e) {
@@ -48,6 +79,17 @@ class EventProvider with ChangeNotifier {
 
     try {
       _events = await _repository.getUpcomingEvents();
+      
+      debugPrint('📅 Loaded ${_events.length} upcoming events');
+      
+      // Schedule reminders for ALL upcoming events (force rehydration)
+      for (final event in _events) {
+        if (event.time.isAfter(DateTime.now())) {
+          debugPrint('📅 Scheduling reminders for event: ${event.title}');
+          await _scheduleEventReminders(event);
+        }
+      }
+      
       _isLoading = false;
       notifyListeners();
     } catch (e) {
@@ -87,8 +129,11 @@ class EventProvider with ChangeNotifier {
         _isLoading = false;
         notifyListeners();
         
-        // Send notification to all users
+        // Send immediate notification to all users via FCM
         await _sendEventNotification(createdEvent);
+        
+        // Schedule local reminders for all users
+        await _scheduleEventReminders(createdEvent);
         
         return true;
       }
@@ -103,7 +148,7 @@ class EventProvider with ChangeNotifier {
     }
   }
 
-  /// Send notification for new event
+  /// Send notification for new event to ALL users
   Future<void> _sendEventNotification(Event event) async {
     try {
       // Format event time
@@ -116,22 +161,61 @@ class EventProvider with ChangeNotifier {
       final title = '📅 New Event: ${event.title}';
       final body = '$eventDate at $eventTime${event.location != null ? '\n📍 ${event.location}' : ''}';
       
-      // Send via FCM topic (all users subscribed to 'all_events')
-      await FCMService().sendTopicNotification(
-        topic: 'all_events',
-        title: title,
-        body: body,
+      debugPrint('📢 Sending event notification to ALL users: ${event.id}');
+      debugPrint('   Title: $title');
+      debugPrint('   Body: $body');
+      
+      // 1. Send FCM push notification to ALL users via broadcast
+      try {
+        await _notificationRepository.broadcastNotification(
+          type: 'event',
+          title: title,
+          message: body,
+          eventData: {
+            'event_id': event.id,
+            'event_title': event.title,
+            'event_time': event.time.toIso8601String(),
+            'event_location': event.location ?? '',
+          },
+        );
+        debugPrint('✅ FCM broadcast notification sent to all users');
+      } catch (e) {
+        debugPrint('⚠️  FCM broadcast failed (users will still see event in app): $e');
+      }
+      
+      // 2. Send local notification on THIS device (for immediate feedback)
+      await _notificationService.showImmediateNotification(
+        event.id,
+        event.title,
+        body,
         data: {
-          'type': 'new_event',
           'event_id': event.id,
           'event_title': event.title,
           'event_time': event.time.toIso8601String(),
           'event_location': event.location ?? '',
         },
       );
+      
+      debugPrint('✅ Immediate local notification shown on creator device');
+      
     } catch (e) {
       // Don't fail event creation if notification fails
-      debugPrint('Failed to send event notification: $e');
+      debugPrint('❌ Failed to send event notification: $e');
+    }
+  }
+
+  /// Schedule reminders for the event
+  Future<void> _scheduleEventReminders(Event event) async {
+    try {
+      // Schedule morning reminder (8:00 AM on event day)
+      await _notificationService.scheduleMorningReminder(event);
+      
+      // Schedule 1-hour before reminder
+      await _notificationService.scheduleOneHourReminder(event);
+      
+      debugPrint('Scheduled reminders for event: ${event.id}');
+    } catch (e) {
+      debugPrint('Failed to schedule reminders: $e');
     }
   }
 
@@ -149,6 +233,10 @@ class EventProvider with ChangeNotifier {
           _events[index] = updatedEvent;
         }
         _selectedEvent = updatedEvent;
+        
+        // Reschedule notifications for updated event
+        await _notificationService.rescheduleOnUpdate(updatedEvent);
+        
         _isLoading = false;
         notifyListeners();
         return true;
@@ -177,6 +265,10 @@ class EventProvider with ChangeNotifier {
         if (_selectedEvent?.id == id) {
           _selectedEvent = null;
         }
+        
+        // Cancel all notifications for deleted event
+        await _notificationService.cancelEventNotifications(id);
+        
         _isLoading = false;
         notifyListeners();
         return true;

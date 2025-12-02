@@ -63,7 +63,7 @@ class SearchRepository {
           .from('faculty')
           .select('''
             *,
-            user:user_id(id, name, email, profile_pic)
+            user:users!user_id(id, name, email, profile_pic)
           ''')
           .or('department.ilike.$searchPattern,designation.ilike.$searchPattern,office_location.ilike.$searchPattern')
           .order('created_at', ascending: false)

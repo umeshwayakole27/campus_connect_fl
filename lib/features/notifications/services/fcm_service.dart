@@ -17,13 +17,24 @@ class FCMService {
   // Initialize FCM
   Future<void> initialize() async {
     try {
-      // Request permission
-      final settings = await _firebaseMessaging.requestPermission(
-        alert: true,
-        badge: true,
-        sound: true,
-        provisional: false,
-      );
+      // Check current permission status first
+      NotificationSettings currentSettings = await _firebaseMessaging.getNotificationSettings();
+      
+      // Only request permission if not already determined
+      NotificationSettings settings;
+      if (currentSettings.authorizationStatus == AuthorizationStatus.notDetermined) {
+        // Wait a bit to ensure UI is ready before showing permission dialog
+        await Future.delayed(const Duration(milliseconds: 500));
+        
+        settings = await _firebaseMessaging.requestPermission(
+          alert: true,
+          badge: true,
+          sound: true,
+          provisional: false,
+        );
+      } else {
+        settings = currentSettings;
+      }
 
       if (settings.authorizationStatus == AuthorizationStatus.authorized) {
         print('User granted notification permission');

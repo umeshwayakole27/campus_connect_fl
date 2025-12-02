@@ -29,14 +29,19 @@ class EventRepository {
           ''')
           .order('time', ascending: true);
 
-      final events = (response as List)
-          .map((json) => Event.fromJson(json))
-          .toList();
+      AppLogger.logInfo('Events response received, parsing...');
+      final events = (response as List).map((json) {
+        AppLogger.logInfo('Event creator field: ${json['creator']}');
+        return Event.fromJson(json);
+      }).toList();
 
       // Update cache
       _cachedEvents = events;
       _lastFetchTime = DateTime.now();
 
+      if (events.isNotEmpty) {
+        AppLogger.logInfo('Fetched ${events.length} events, first creator: ${events.first.creatorName}');
+      }
       return events;
     } catch (e) {
       AppLogger.logError('Failed to fetch events', error: e);

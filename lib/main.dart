@@ -128,9 +128,14 @@ class CampusConnectApp extends StatelessWidget {
   }
 }
 
-class AuthWrapper extends StatelessWidget {
+class AuthWrapper extends StatefulWidget {
   const AuthWrapper({super.key});
 
+  @override
+  State<AuthWrapper> createState() => _AuthWrapperState();
+}
+
+class _AuthWrapperState extends State<AuthWrapper> {
   @override
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(
@@ -196,25 +201,57 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
+  bool _permissionsInitialized = false;
 
   @override
   void initState() {
     super.initState();
-    // Initialize FCM and request location permission when home page loads
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Delay to ensure UI is fully ready and avoid overlapping dialogs
-      Future.delayed(const Duration(milliseconds: 1000), () async {
-        if (mounted) {
-          // Request location permission first
-          await _requestLocationPermission();
-          // Wait before requesting notification permission to avoid overlapping dialogs
-          await Future.delayed(const Duration(milliseconds: 1000));
-          if (mounted) {
-            context.read<NotificationProvider>().initializeFCM();
-          }
-        }
-      });
-    });
+    _initializePermissionsAndServices();
+  }
+
+  Future<void> _initializePermissionsAndServices() async {
+    if (_permissionsInitialized) return;
+    
+    // Wait for the first frame to render completely
+    await Future.delayed(const Duration(milliseconds: 1500));
+    
+    if (!mounted) return;
+    
+    try {
+      // Request location permission first
+      await _requestLocationPermission();
+      
+      // Wait before requesting notification permissions to avoid overlapping dialogs
+      await Future.delayed(const Duration(milliseconds: 1500));
+      
+      if (!mounted) return;
+      
+      // Initialize FCM (will request notification permission)
+      final notificationProvider = context.read<NotificationProvider>();
+      await notificationProvider.initializeFCM();
+      
+      // Save FCM token for the current user
+      final authProvider = context.read<AuthProvider>();
+      if (authProvider.currentUser != null) {
+        await notificationProvider.saveFCMToken(authProvider.currentUser!.id);
+      }
+      
+      // Wait a bit more before initializing event notifications
+      await Future.delayed(const Duration(milliseconds: 1000));
+      
+      if (!mounted) return;
+      
+      // Initialize event notification service
+      final eventProvider = context.read<EventProvider>();
+      await eventProvider.initialize();
+      
+      // Load events and rehydrate pending schedules
+      await eventProvider.loadUpcomingEvents();
+      
+      _permissionsInitialized = true;
+    } catch (e) {
+      AppLogger.logError('Failed to initialize permissions and services', error: e);
+    }
   }
 
   Future<void> _requestLocationPermission() async {
@@ -222,8 +259,6 @@ class _HomePageState extends State<HomePage> {
       final permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         if (mounted) {
-          // Small delay to ensure the UI is fully rendered
-          await Future.delayed(const Duration(milliseconds: 300));
           await Geolocator.requestPermission();
         }
       }

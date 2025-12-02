@@ -6,6 +6,8 @@ import 'notification_provider.dart';
 import '../../../core/widgets/loading_widget.dart';
 import '../../../core/widgets/empty_state_widget.dart';
 import '../../../core/models/notification_model.dart';
+import '../../events/presentation/event_provider.dart';
+import '../../events/presentation/event_detail_screen.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -168,9 +170,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             : theme.colorScheme.surfaceContainerHighest,
         child: ListTile(
           leading: CircleAvatar(
-            backgroundColor: _getNotificationColor(notification.type, theme),
+            backgroundColor: _getNotificationColor(notification.type ?? 'system', theme),
             child: Icon(
-              _getNotificationIcon(notification.type),
+              _getNotificationIcon(notification.type ?? 'system'),
               color: theme.colorScheme.onPrimary,
             ),
           ),
@@ -178,7 +180,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             children: [
               Expanded(
                 child: Text(
-                  notification.message,
+                  notification.message ?? 'Notification',
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: isUnread ? FontWeight.bold : FontWeight.normal,
                   ),
@@ -205,11 +207,39 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               ),
               if (notification.type == 'event' && notification.eventId != null)
                 TextButton.icon(
-                  onPressed: () {
-                    // TODO: Navigate to event detail
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Navigate to event')),
-                    );
+                  onPressed: () async {
+                    // Navigate to event detail
+                    try {
+                      // First, try to get the event details
+                      final eventProvider = context.read<EventProvider>();
+                      final events = eventProvider.events;
+                      
+                      // Find the event
+                      final event = events.firstWhere(
+                        (e) => e.id == notification.eventId,
+                        orElse: () => throw Exception('Event not found'),
+                      );
+                      
+                      // Navigate to event detail screen
+                      if (!mounted) return;
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => EventDetailScreen(event: event),
+                        ),
+                      );
+                    } catch (e) {
+                      if (!mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            e.toString().contains('Event not found')
+                                ? 'Event has been deleted or is no longer available'
+                                : 'Unable to open event details',
+                          ),
+                          backgroundColor: Theme.of(context).colorScheme.error,
+                        ),
+                      );
+                    }
                   },
                   icon: const Icon(Icons.arrow_forward, size: 16),
                   label: const Text('View Event'),

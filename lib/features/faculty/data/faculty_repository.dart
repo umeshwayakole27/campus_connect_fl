@@ -24,19 +24,31 @@ class FacultyRepository {
           .from('faculty')
           .select('''
             *,
-            user:users!faculty_user_id_fkey(id, name, email, profile_pic)
+            user:users!user_id(id, name, email, profile_pic)
           ''')
-          .order('user(name)', ascending: true);
+          .order('created_at', ascending: false);
 
-      final faculty = (response as List)
-          .map((json) => Faculty.fromJson(json))
-          .toList();
+      AppLogger.logInfo('Faculty response received, parsing...');
+      AppLogger.logInfo('Raw response: $response');
+      AppLogger.logInfo('Raw response type: ${response.runtimeType}');
+      
+      final faculty = (response as List).map((json) {
+        AppLogger.logInfo('Raw JSON keys: ${json.keys}');
+        AppLogger.logInfo('user field: ${json['user']}');
+        
+        final facultyObj = Faculty.fromJson(json);
+        AppLogger.logInfo('Faculty userName: ${facultyObj.userName}');
+        return facultyObj;
+      }).toList();
 
       // Update cache
       _cachedFaculty = faculty;
       _lastFetchTime = DateTime.now();
 
       AppLogger.logInfo('Fetched ${faculty.length} faculty members');
+      if (faculty.isNotEmpty) {
+        AppLogger.logInfo('First faculty name: ${faculty.first.userName}');
+      }
       return faculty;
     } catch (e) {
       AppLogger.logError('Failed to fetch faculty', error: e);
@@ -51,7 +63,7 @@ class FacultyRepository {
           .from('faculty')
           .select('''
             *,
-            user:users!faculty_user_id_fkey(id, name, email, profile_pic)
+            user:users!user_id(id, name, email, profile_pic)
           ''')
           .eq('id', id)
           .single();
@@ -70,7 +82,7 @@ class FacultyRepository {
           .from('faculty')
           .select('''
             *,
-            user:users!faculty_user_id_fkey(id, name, email, profile_pic)
+            user:users!user_id(id, name, email, profile_pic)
           ''')
           .eq('user_id', userId)
           .single();
@@ -89,10 +101,10 @@ class FacultyRepository {
           .from('faculty')
           .select('''
             *,
-            user:users!faculty_user_id_fkey(id, name, email, profile_pic)
+            user:users!user_id(id, name, email, profile_pic)
           ''')
           .eq('department', department)
-          .order('user(name)', ascending: true);
+          .order('created_at', ascending: false);
 
       return (response as List)
           .map((json) => Faculty.fromJson(json))
@@ -110,14 +122,19 @@ class FacultyRepository {
           .from('faculty')
           .select('''
             *,
-            user:users!faculty_user_id_fkey(id, name, email, profile_pic)
+            user:users!user_id(id, name, email, profile_pic)
           ''')
-          .ilike('user.name', '%$query%')
-          .order('user(name)', ascending: true);
+          .order('created_at', ascending: false);
 
-      return (response as List)
+      // Filter by name in memory since Supabase doesn't support filtering on joined tables easily
+      final allFaculty = (response as List)
           .map((json) => Faculty.fromJson(json))
           .toList();
+      
+      return allFaculty.where((faculty) {
+        final name = faculty.userName?.toLowerCase() ?? '';
+        return name.contains(query.toLowerCase());
+      }).toList();
     } catch (e) {
       AppLogger.logError('Failed to search faculty', error: e);
       throw Exception('Failed to search faculty: ${e.toString()}');
@@ -162,7 +179,7 @@ class FacultyRepository {
           .eq('id', id)
           .select('''
             *,
-            user:users!faculty_user_id_fkey(id, name, email, profile_pic)
+            user:users!user_id(id, name, email, profile_pic)
           ''')
           .single();
 

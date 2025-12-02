@@ -266,6 +266,8 @@ class _SearchScreenState extends State<SearchScreen> {
         if (searchProvider.events.isNotEmpty) ...[
           _buildSectionHeader('Events', searchProvider.events.length),
           ...searchProvider.events.map((event) => Card(
+                elevation: 2,
+                margin: const EdgeInsets.symmetric(vertical: 4),
                 child: ListTile(
                   leading: CircleAvatar(
                     backgroundColor: theme.colorScheme.primaryContainer,
@@ -274,13 +276,21 @@ class _SearchScreenState extends State<SearchScreen> {
                       color: theme.colorScheme.onPrimaryContainer,
                     ),
                   ),
-                  title: Text(event.title),
+                  title: Text(
+                    event.title,
+                    style: TextStyle(color: theme.colorScheme.onSurface),
+                  ),
                   subtitle: Text(
                     '${_formatDate(event.time)} • ${event.location}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
                   ),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  trailing: Icon(
+                    Icons.arrow_forward_ios, 
+                    size: 16,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                   onTap: () {
                     Navigator.push(
                       context,
@@ -298,6 +308,8 @@ class _SearchScreenState extends State<SearchScreen> {
         if (searchProvider.faculty.isNotEmpty) ...[
           _buildSectionHeader('Faculty', searchProvider.faculty.length),
           ...searchProvider.faculty.map((faculty) => Card(
+                elevation: 2,
+                margin: const EdgeInsets.symmetric(vertical: 4),
                 child: ListTile(
                   leading: CircleAvatar(
                     backgroundColor: theme.colorScheme.secondaryContainer,
@@ -306,13 +318,21 @@ class _SearchScreenState extends State<SearchScreen> {
                       color: theme.colorScheme.onSecondaryContainer,
                     ),
                   ),
-                  title: Text(faculty.userName ?? 'Unknown'),
+                  title: Text(
+                    faculty.userName ?? 'Unknown',
+                    style: TextStyle(color: theme.colorScheme.onSurface),
+                  ),
                   subtitle: Text(
                     '${faculty.designation ?? 'Faculty'} • ${faculty.department}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
                   ),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  trailing: Icon(
+                    Icons.arrow_forward_ios, 
+                    size: 16,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                   onTap: () {
                     Navigator.push(
                       context,
@@ -330,6 +350,8 @@ class _SearchScreenState extends State<SearchScreen> {
         if (searchProvider.locations.isNotEmpty) ...[
           _buildSectionHeader('Campus Locations', searchProvider.locations.length),
           ...searchProvider.locations.map((location) => Card(
+                elevation: 2,
+                margin: const EdgeInsets.symmetric(vertical: 4),
                 child: ListTile(
                   leading: CircleAvatar(
                     backgroundColor: theme.colorScheme.tertiaryContainer,
@@ -338,13 +360,21 @@ class _SearchScreenState extends State<SearchScreen> {
                       color: theme.colorScheme.onTertiaryContainer,
                     ),
                   ),
-                  title: Text(location.name),
+                  title: Text(
+                    location.name,
+                    style: TextStyle(color: theme.colorScheme.onSurface),
+                  ),
                   subtitle: Text(
                     location.buildingCode ?? location.description ?? 'Campus location',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
                   ),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  trailing: Icon(
+                    Icons.arrow_forward_ios, 
+                    size: 16,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                   onTap: () {
                     Navigator.push(
                       context,

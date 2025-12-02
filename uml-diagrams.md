@@ -116,6 +116,8 @@ package "Campus Connect System" {
   usecase "Create Event" as UC7
   usecase "Manage Events" as UC8
   usecase "Send Notifications" as UC9
+  usecase "View Locations" as UC10
+  usecase "Get Directions" as UC11
   
 }
 
@@ -126,6 +128,8 @@ S --> UC3
 S --> UC4
 S --> UC5
 S --> UC6
+S --> UC10
+S --> UC11
 
 ' Faculty use cases
 F --> UC1
@@ -137,18 +141,27 @@ F --> UC6
 F --> UC7
 F --> UC8
 F --> UC9
+F --> UC10
+F --> UC11
 
 ' Include relationships
 UC7 ..> UC9 : <<include>>
 UC8 ..> UC9 : <<include>>
 
+' Extend relationships
+UC11 ..> UC10 : <<extend>>
+UC11 ..> UC4 : <<extend>>
+
 @enduml
 ```
 
 **User Roles:**
-- **Student**: Login, View Events, Browse Faculty, Campus Map, Search, Receive Notifications
+- **Student**: Login, View Events, Browse Faculty, Campus Map, Search, Receive Notifications, View Locations, Get Directions
 - **Faculty**: All student features + Create Event, Manage Events, Send Notifications
-  - Note: When faculty creates/manages events, notifications are automatically sent to all users
+
+**Key Interactions:**
+- **Get Directions**: Users can click on any location (from map, events, faculty offices) to get turn-by-turn directions
+- **Send Notifications**: Automatically triggered when faculty creates or manages events
 
 ---
 
